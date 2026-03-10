@@ -31,7 +31,7 @@
     .dayHead .h{font-weight:800;font-size:13px}
     .dayHead .s{color:var(--muted);font-size:12px;margin-top:2px}
     .dayBody{padding:10px 12px;display:flex;flex-direction:column;gap:8px;flex:1}
-    .card{border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:10px;background:rgba(15,46,34,.35);display:flex;flex-direction:column;gap:6px}
+    .card{border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:8px;background:rgba(15,46,34,.35);display:flex;flex-direction:column;gap:3px}
     .line{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
     .pill{font-size:11px;padding:4px 8px;border-radius:999px;border:1px solid rgba(255,255,255,.14);color:var(--muted)}
     .pill.ok{border-color:rgba(63,174,115,.55);color:#d6ffe9}
@@ -161,6 +161,7 @@ const en = new Date(r.EndDT);
 const dName = driverName(r.DriverCode);
 const vLabel = vehicleLabel(r.VehicleCode);
 const p = r.Payload || {};
+const notes = p.Notes || "";
 
 body.insertAdjacentHTML("beforeend", `
   <div class="card">
@@ -172,27 +173,20 @@ body.insertAdjacentHTML("beforeend", `
     <div class="small">${escapeHtml(subtitleFor(r))}</div>
 
     <div class="line">
-      <span class="pill">${escapeHtml(r.Type)}</span>
-      <span class="pill">🕒 ${st.toLocaleTimeString(undefined,{hour:"2-digit",minute:"2-digit"})}–${en.toLocaleTimeString(undefined,{hour:"2-digit",minute:"2-digit"})}</span>
-    </div>
-
-    <div class="line">
-      <span class="pill">👤 ${escapeHtml(r.DriverCode || "—")}${dName ? " — " + escapeHtml(dName) : ""}</span>
-      <span class="pill">🚚 ${escapeHtml(r.VehicleCode || "—")}${vLabel ? " — " + escapeHtml(vLabel) : ""}</span>
+      <span class="pill">🕒 ${st.toLocaleTimeString(undefined,{hour:"2-digit",minute:"2-digit"})}</span>
+      <span class="pill">👤 ${escapeHtml(r.DriverCode || "—")}</span>
+      <span class="pill">🚚 ${escapeHtml(r.VehicleCode || "—")}</span>
     </div>
 
     ${
       r.Type === "Delivery"
-        ? `<div class="small"><b>SO#:</b> ${escapeHtml(p.SONumber || "—")}</div>
-           <div class="small"><b>Client:</b> ${escapeHtml(p.ClientName || "—")}</div>
-           <div class="small"><b>Items:</b> ${escapeHtml(p.Items || "—")}</div>`
+        ? `<div class="small">${escapeHtml(p.Items || "—")}</div>`
         : r.Type === "Travel"
-        ? `<div class="small"><b>Client:</b> ${escapeHtml(p.ClientName || "—")}</div>
-           <div class="small"><b>Destination:</b> ${escapeHtml(p.Destination || "—")}</div>`
-        : `<div class="small"><b>Purpose:</b> ${escapeHtml(p.Purpose || "—")}</div>
-           <div class="small"><b>Destination:</b> ${escapeHtml(p.Destination || "—")}</div>
-           <div class="small"><b>Required Vehicle:</b> ${escapeHtml(p.RequiredVehicle || "—")}</div>`
+        ? ``
+        : `<div class="small">${escapeHtml(p.Purpose || "—")}${p.RequiredVehicle ? " • " + escapeHtml(p.RequiredVehicle) : ""}</div>`
     }
+
+    ${notes ? `<div class="small">📝 ${escapeHtml(notes)}</div>` : ""}
   </div>
 `);
         }
