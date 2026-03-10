@@ -157,24 +157,44 @@
       } else {
         for(const r of list){
           const st = new Date(r.StartDT);
-          const en = new Date(r.EndDT);
-          const dName = driverName(r.DriverCode);
-          const vLabel = vehicleLabel(r.VehicleCode);
-          body.insertAdjacentHTML("beforeend", `
-            <div class="card">
-              <div class="line" style="justify-content:space-between">
-                <div style="font-weight:800">${escapeHtml(titleFor(r))}</div>
-                <span class="pill ${r.Status==="CANCELLED" ? "bad" : "ok"}">${escapeHtml(r.Status)}</span>
-              </div>
-              <div class="small">${escapeHtml(subtitleFor(r))}</div>
-              <div class="line">
-                <span class="pill">${escapeHtml(r.Type)}</span>
-                <span class="pill">🕒 ${st.toLocaleTimeString(undefined,{hour:"2-digit",minute:"2-digit"})}–${en.toLocaleTimeString(undefined,{hour:"2-digit",minute:"2-digit"})}</span>
-                <span class="pill">👤 ${escapeHtml(dName || r.DriverCode || "—")}</span>
-                <span class="pill">🚚 ${escapeHtml(vLabel || r.VehicleCode || "—")}</span>
-              </div>
-            </div>
-          `);
+const en = new Date(r.EndDT);
+const dName = driverName(r.DriverCode);
+const vLabel = vehicleLabel(r.VehicleCode);
+const p = r.Payload || {};
+
+body.insertAdjacentHTML("beforeend", `
+  <div class="card">
+    <div class="line" style="justify-content:space-between">
+      <div style="font-weight:800">${escapeHtml(titleFor(r))}</div>
+      <span class="pill ${r.Status==="CANCELLED" ? "bad" : "ok"}">${escapeHtml(r.Status)}</span>
+    </div>
+
+    <div class="small">${escapeHtml(subtitleFor(r))}</div>
+
+    <div class="line">
+      <span class="pill">${escapeHtml(r.Type)}</span>
+      <span class="pill">🕒 ${st.toLocaleTimeString(undefined,{hour:"2-digit",minute:"2-digit"})}–${en.toLocaleTimeString(undefined,{hour:"2-digit",minute:"2-digit"})}</span>
+    </div>
+
+    <div class="line">
+      <span class="pill">👤 ${escapeHtml(r.DriverCode || "—")}${dName ? " — " + escapeHtml(dName) : ""}</span>
+      <span class="pill">🚚 ${escapeHtml(r.VehicleCode || "—")}${vLabel ? " — " + escapeHtml(vLabel) : ""}</span>
+    </div>
+
+    ${
+      r.Type === "Delivery"
+        ? `<div class="small"><b>SO#:</b> ${escapeHtml(p.SONumber || "—")}</div>
+           <div class="small"><b>Client:</b> ${escapeHtml(p.ClientName || "—")}</div>
+           <div class="small"><b>Items:</b> ${escapeHtml(p.Items || "—")}</div>`
+        : r.Type === "Travel"
+        ? `<div class="small"><b>Client:</b> ${escapeHtml(p.ClientName || "—")}</div>
+           <div class="small"><b>Destination:</b> ${escapeHtml(p.Destination || "—")}</div>`
+        : `<div class="small"><b>Purpose:</b> ${escapeHtml(p.Purpose || "—")}</div>
+           <div class="small"><b>Destination:</b> ${escapeHtml(p.Destination || "—")}</div>
+           <div class="small"><b>Required Vehicle:</b> ${escapeHtml(p.RequiredVehicle || "—")}</div>`
+    }
+  </div>
+`);
         }
       }
 
