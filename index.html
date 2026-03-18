@@ -438,6 +438,7 @@
   let offsetWeeks = 0;
   let BOOT = null;
   let items = [];
+  let isSubmittingRequest = false;
 
   const pad2 = n => String(n).padStart(2,"0");
   const ymd = d => `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
@@ -510,10 +511,18 @@
 
   function openRequestModal(){
     $("requestBg").style.display = "flex";
+    setSubmitBusy(false);
   }
 
   function closeRequestModal(){
+    if(isSubmittingRequest) return;
     $("requestBg").style.display = "none";
+  }
+
+  function setSubmitBusy(busy){
+    $("btnSubmitRequest").disabled = busy;
+    $("btnRequestClose").disabled = busy;
+    $("btnSubmitRequest").textContent = busy ? "Submitting..." : "Submit Request";
   }
 
   function openDetailModal(item){
@@ -621,8 +630,6 @@
         for(const r of list){
           const st = new Date(r.StartDT);
           const en = new Date(r.EndDT);
-          const dName = driverName(r.DriverCode);
-          const vLabel = vehicleLabel(r.VehicleCode);
           const p = r.Payload || {};
           const notes = p.Notes || "";
 
@@ -787,6 +794,8 @@
   }
 
   async function submitRequest(){
+    if(isSubmittingRequest) return;
+
     const type = $("fType").value;
     const errs = validateForm(type);
     if(errs.length) return alert(errs.join("\n"));
@@ -822,17 +831,35 @@
       };
     }
 
-    const res = await api("createRequest", {
-      Type: type,
-      RequestedBy: getValue("fRequestedBy"),
-      ViberUserID: "WEB-PORTAL",
-      StartDT: start.toISOString(),
-      EndDT: end.toISOString(),
-      Payload: payload
-    });
+    const clientRequestId = (window.crypto && crypto.randomUUID)
+      ? crypto.randomUUID()
+      : `STAFF-${Date.now()}-${Math.random().toString(36).slice(2,10)}`;
 
-    alert(`Request submitted successfully.\n\nRequest ID: ${res.requestId}\nCancel Code: ${res.cancelCode}`);
-    closeRequestModal();
+    try{
+      isSubmittingRequest = true;
+      setSubmitBusy(true);
+
+      const res = await api("createRequest", {
+        clientRequestId,
+        Type: type,
+        RequestedBy: getValue("fRequestedBy"),
+        ViberUserID: "WEB-PORTAL",
+        StartDT: start.toISOString(),
+        EndDT: end.toISOString(),
+        Payload: payload
+      });
+
+      alert(`Request submitted successfully.\n\nRequest ID: ${res.requestId}\nCancel Code: ${res.cancelCode}`);
+
+      isSubmittingRequest = false;
+      setSubmitBusy(false);
+      closeRequestModal();
+
+    } catch(err){
+      isSubmittingRequest = false;
+      setSubmitBusy(false);
+      alert("Failed to submit request.\n\n" + (err.message || err));
+    }
   }
 
   async function load(){
