@@ -601,7 +601,8 @@
     dates.forEach(d=> byDay[ymd(d)] = []);
 
     items.forEach(r=>{
-      const k = String(r.StartDT||"").slice(0,10);
+      const dt = new Date(r.StartDT);
+      const k = ymd(dt);
       if(byDay[k]) byDay[k].push(r);
     });
 
