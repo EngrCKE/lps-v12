@@ -558,6 +558,10 @@
       "\"":"&quot;",
       "'":"&#039;"
     }[c]));
+  function escapeAttr(str){
+    return escapeHtml(String(str ?? "")).replace(/'/g, "&#39;");
+  }
+
   }
 
   async function api(action, payload){
