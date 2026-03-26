@@ -551,17 +551,17 @@
   }
 
   function escapeHtml(str){
-    return String(str ?? "").replace(/[&<>"']/g, c=>({
+    return String(str ?? "").replace(/[&<>\"']/g, c=>({
       "&":"&amp;",
       "<":"&lt;",
       ">":"&gt;",
       "\"":"&quot;",
       "'":"&#039;"
     }[c]));
-  function escapeAttr(str){
-    return escapeHtml(String(str ?? "")).replace(/'/g, "&#39;");
   }
 
+  function escapeAttr(str){
+    return escapeHtml(String(str ?? "")).replace(/'/g, "&#39;");
   }
 
   async function api(action, payload){
