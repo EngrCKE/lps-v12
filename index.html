@@ -135,9 +135,20 @@
     }
 
     .day.today .dayHead .h,
-    .day.today .dayHead .s,
-    .day.today .small{
+    .day.today .dayHead .s{
       color:#4d4636;
+    }
+
+    .day.today .card{
+      background:rgba(15,46,34,.62);
+      border-color:rgba(15,46,34,.38);
+    }
+
+    .day.today .compactMain,
+    .day.today .compactMeta,
+    .day.today .pill,
+    .day.today .small{
+      color:var(--txt);
     }
 
     .dayHead{
@@ -398,7 +409,7 @@
           <label>Request Type</label>
           <select id="fType">
             <option>Delivery</option>
-            <option>Travel</option>
+            <option>Client Call</option>
             <option>Service</option>
           </select>
         </div>
@@ -524,17 +535,27 @@
     return v ? v.VehicleLabel : "";
   }
 
+  function displayType(type){
+    return type === "Travel" ? "Client Call" : (type || "");
+  }
+
+  function typeEmoji(type){
+    if(type === "Delivery") return "📦";
+    if(type === "Travel") return "📞";
+    return "🛠️";
+  }
+
   function titleFor(r){
     const p = r.Payload || {};
     if(r.Type==="Delivery") return `${p.SONumber || "SO ?"} • ${p.ClientName || ""}`.trim();
-    if(r.Type==="Travel") return `${p.ClientName || ""} • ${p.Destination || ""}`.trim();
+    if(r.Type==="Travel" || r.Type==="Client Call") return `${p.ClientName || ""} • ${p.Destination || ""}`.trim();
     return `${p.Purpose || "Service"} • ${p.Destination || ""}`.trim();
   }
 
   function subtitleFor(r){
     const p = r.Payload || {};
     if(r.Type==="Delivery") return `${p.Address || ""}`.trim();
-    if(r.Type==="Travel") return `${p.Destination || ""}`.trim();
+    if(r.Type==="Travel" || r.Type==="Client Call") return `${p.Destination || ""}`.trim();
     return `${p.RequiredVehicle ? ("Vehicle: " + p.RequiredVehicle + " • ") : ""}${p.Destination || ""}`.trim();
   }
 
@@ -576,7 +597,7 @@
   function compactMainLine(r){
     const p = r.Payload || {};
     if(r.Type === "Delivery") return [p.SONumber, p.ClientName, p.Address].filter(Boolean).map(escapeHtml).map(x=>`<b>${x}</b>`).join(" • ") || `<b>Delivery</b>`;
-    if(r.Type === "Travel") return [p.ClientName, p.Destination].filter(Boolean).map(escapeHtml).map(x=>`<b>${x}</b>`).join(" • ") || `<b>Travel</b>`;
+    if(r.Type === "Travel" || r.Type === "Client Call") return [p.ClientName, p.Destination].filter(Boolean).map(escapeHtml).map(x=>`<b>${x}</b>`).join(" • ") || `<b>Client Call</b>`;
     return [p.ClientName, p.Destination, p.Purpose].filter(Boolean).map(escapeHtml).map(x=>`<b>${x}</b>`).join(" • ") || `<b>Service</b>`;
   }
 
@@ -598,7 +619,7 @@
       <div class="detailGrid">
         <div class="detailBox">
           <div class="small"><b>Request ID:</b> ${escapeHtml(item.RequestID || "—")}</div>
-          <div class="small"><b>Type:</b> ${escapeHtml(item.Type || "—")}</div>
+          <div class="small"><b>Type:</b> ${escapeHtml(displayType(item.Type || "—"))}</div>
           <div class="small"><b>Status:</b> ${escapeHtml(item.Status || "—")}</div>
         </div>
 
@@ -697,15 +718,16 @@
           const card = document.createElement("div");
           card.className = "card";
           card.innerHTML = `
-            <div class="line" style="justify-content:space-between;align-items:flex-start">
-              <span class="pill">${escapeHtml(r.Type)}</span>
-              <span class="pill ${r.Status==="CANCELLED" ? "bad" : "ok"}">${escapeHtml(r.Status)}</span>
-            </div>
             <div class="compactMain">${compactMainLine(r)}</div>
+            <div class="line" style="gap:6px;flex-wrap:wrap">
+              <span class="pill info">${typeEmoji(r.Type)}</span>
+              <span class="pill info">${r.DriverCode || r.VehicleCode ? "📅" : "📝"}</span>
+              <span class="pill ${r.Status==="CANCELLED" ? "bad" : "ok"}">${r.Status==="CONFIRMED" ? "✅" : (r.Status==="PENDING" ? "⏳" : "❌")}</span>
+            </div>
             <div class="compactMeta">
-              <span><b>Time:</b> ${escapeHtml(st.toLocaleTimeString(undefined,{hour:"2-digit",minute:"2-digit"}))}–${escapeHtml(en.toLocaleTimeString(undefined,{hour:"2-digit",minute:"2-digit"}))}</span>
-              <span><b>Driver:</b> ${escapeHtml(r.DriverCode || "—")}</span>
-              <span><b>Vehicle:</b> ${escapeHtml(r.VehicleCode || "—")}</span>
+              <span>🕒 ${escapeHtml(st.toLocaleTimeString(undefined,{hour:"2-digit",minute:"2-digit"}))}–${escapeHtml(en.toLocaleTimeString(undefined,{hour:"2-digit",minute:"2-digit"}))}</span>
+              <span>👤 ${escapeHtml(r.DriverCode || "—")}</span>
+              <span>🚚 ${escapeHtml(r.VehicleCode || "—")}</span>
             </div>
           `;
 
@@ -756,7 +778,7 @@
       return;
     }
 
-    if(type === "Travel"){
+    if(type === "Travel" || type === "Client Call"){
       wrap.innerHTML = `
         <div class="twoCol">
           <div>
@@ -832,7 +854,7 @@
       if(!getValue("pItems")) errs.push("Items to Deliver is required.");
     }
 
-    if(type === "Travel"){
+    if(type === "Travel" || type === "Client Call"){
       if(!getValue("pClient")) errs.push("Client Name is required.");
       if(!getValue("pDestination")) errs.push("Destination is required.");
     }
@@ -869,7 +891,7 @@
         Items: getValue("pItems"),
         Notes: getValue("pNotes")
       };
-    } else if(type === "Travel"){
+    } else if(type === "Travel" || type === "Client Call"){
       payload = {
         ClientName: getValue("pClient"),
         Destination: getValue("pDestination"),
