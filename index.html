@@ -525,12 +525,32 @@
     $("btnSubmitRequest").textContent = busy ? "Submitting..." : "Submit Request";
   }
 
+  function installerListHtml(payload){
+    const arr = Array.isArray(payload.Installers) ? payload.Installers : [];
+    if(!arr.length) return "";
+
+    const items = arr.map(inst=>{
+      if(inst && typeof inst === "object"){
+        const name = inst.InstallerName || inst.name || inst.Name || inst.label || inst.code || inst.InstallerCode || "";
+        const num = inst.ContactNumber || inst.Number || inst.phone || inst.Mobile || "";
+        return `<li>${escapeHtml(name || "—")}${num ? ` <span class="small">(${escapeHtml(num)})</span>` : ""}</li>`;
+      }
+      return `<li>${escapeHtml(String(inst))}</li>`;
+    }).join("");
+
+    return `
+      <div class="small" style="margin-top:8px"><b>Installers:</b></div>
+      <ul class="small" style="margin:6px 0 0 18px;padding:0;display:grid;gap:4px">${items}</ul>
+    `;
+  }
+
   function openDetailModal(item){
     const p = item.Payload || {};
     const st = new Date(item.StartDT);
     const en = new Date(item.EndDT);
     const dName = driverName(item.DriverCode);
     const vLabel = vehicleLabel(item.VehicleCode);
+    const installerHtml = installerListHtml(p);
 
     $("detailStatus").textContent = item.Status || "";
     $("detailContent").innerHTML = `
@@ -562,14 +582,16 @@
             <div class="small"><b>Contact Number:</b> ${escapeHtml(p.ContactNumber || "—")}</div>
             <div class="small"><b>Delivery Address:</b> ${escapeHtml(p.Address || "—")}</div>
             <div class="small"><b>Items to Deliver:</b> ${escapeHtml(p.Items || "—")}</div>
-            ${p.Notes ? `<div class="small"><b>Special Instructions:</b> ${escapeHtml(p.Notes)}</div>` : ""}
+            ${installerHtml}
+            ${p.Notes ? `<div class="small" style="margin-top:8px"><b>Special Instructions:</b> ${escapeHtml(p.Notes)}</div>` : ""}
           </div>
         ` : item.Type === "Travel" ? `
           <div class="detailBox">
             <div class="small"><b>Name:</b> ${escapeHtml(item.RequestedBy || "—")}</div>
             <div class="small"><b>Client Name:</b> ${escapeHtml(p.ClientName || "—")}</div>
             <div class="small"><b>Destination:</b> ${escapeHtml(p.Destination || "—")}</div>
-            ${p.Notes ? `<div class="small"><b>Special Instructions:</b> ${escapeHtml(p.Notes)}</div>` : ""}
+            ${installerHtml}
+            ${p.Notes ? `<div class="small" style="margin-top:8px"><b>Special Instructions:</b> ${escapeHtml(p.Notes)}</div>` : ""}
           </div>
         ` : `
           <div class="detailBox">
@@ -577,7 +599,8 @@
             <div class="small"><b>Destination:</b> ${escapeHtml(p.Destination || "—")}</div>
             <div class="small"><b>Purpose:</b> ${escapeHtml(p.Purpose || "—")}</div>
             <div class="small"><b>Required Vehicle:</b> ${escapeHtml(p.RequiredVehicle || "—")}</div>
-            ${p.Notes ? `<div class="small"><b>Special Instructions:</b> ${escapeHtml(p.Notes)}</div>` : ""}
+            ${installerHtml}
+            ${p.Notes ? `<div class="small" style="margin-top:8px"><b>Special Instructions:</b> ${escapeHtml(p.Notes)}</div>` : ""}
           </div>
         `
       }
