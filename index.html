@@ -147,8 +147,17 @@
     .day.today .compactMain,
     .day.today .compactMeta,
     .day.today .pill,
-    .day.today .small{
+    .day.today .small,
+    .day.today .dispatchGroup,
+    .day.today .dispatchItem,
+    .day.today .dispatchHead{
       color:var(--txt);
+    }
+
+    .day.today .dispatchGroup,
+    .day.today .dispatchItem{
+      background:rgba(15,46,34,.72);
+      border:1px solid rgba(15,46,34,.34);
     }
 
     .dayHead{
@@ -359,6 +368,37 @@
       .detailGrid{grid-template-columns:1fr}
     }
 
+
+    .tabs{
+      display:flex;
+      gap:8px;
+      margin:12px 0;
+      flex-wrap:wrap;
+    }
+
+    .tab{
+      padding:9px 14px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.05);
+      cursor:pointer;
+      color:var(--txt);
+      font-weight:800;
+      font-size:13px;
+    }
+
+    .tab.active{
+      background:var(--panel2);
+      border-color:rgba(255,255,255,.18);
+    }
+
+    .dispatchDay{display:grid;gap:10px;margin-bottom:14px;}
+    .dispatchGroup{padding:10px 12px;border-radius:14px;background:rgba(255,255,255,.04);}
+    .dispatchItems{display:grid;gap:8px;margin-top:8px;}
+    .dispatchItem{padding:8px 10px;border-radius:12px;background:rgba(255,255,255,.03);}
+    .dispatchHead{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center;}
+
+
     footer{
       margin-top:18px;
       text-align:center;
@@ -389,7 +429,13 @@
     </div>
   </div>
 
+  <div class="tabs">
+    <div class="tab active" data-tab="calendar">Calendar</div>
+    <div class="tab" data-tab="dispatch">Dispatch</div>
+  </div>
+
   <div class="panel" id="cal"></div>
+  <div class="panel" id="dispatchView" style="display:none;"></div>
 
   <footer>© 2026 Focolare Carpentry / SJTC Manufacturing Inc. • Developed by <b>Engr. CK Empeynado</b></footer>
 </main>
@@ -536,16 +582,10 @@
   }
 
   function displayType(type){
-    return type === "Travel" ? "Client Call" : (type || "");
+    return type === "Travel" || type === "Client Call" ? "Client Call" : (type || "");
   }
 
-  function typeEmoji(type){
-    if(type === "Delivery") return "📦";
-    if(type === "Travel") return "📞";
-    return "🛠️";
-  }
-
-  function titleFor(r){
+    function titleFor(r){
     const p = r.Payload || {};
     if(r.Type==="Delivery") return `${p.SONumber || "SO ?"} • ${p.ClientName || ""}`.trim();
     if(r.Type==="Travel" || r.Type==="Client Call") return `${p.ClientName || ""} • ${p.Destination || ""}`.trim();
@@ -642,7 +682,7 @@
             ${installerHtml}
             ${p.Notes ? `<div class="small" style="margin-top:8px"><b>Special Instructions:</b> ${escapeHtml(p.Notes)}</div>` : ""}
           </div>
-        ` : item.Type === "Travel" ? `
+        ` : (item.Type === "Travel" || item.Type === "Client Call") ? `
           <div class="detailBox">
             <div class="small"><b>Name:</b> ${escapeHtml(item.RequestedBy || "—")}</div>
             <div class="small"><b>Client Name:</b> ${escapeHtml(p.ClientName || "—")}</div>
@@ -671,7 +711,7 @@
     $("detailBg").style.display = "none";
   }
 
-  function render(){
+  function renderCalendar(){
     const cal = $("cal");
     const dates = windowDates();
     const start = dates[0];
@@ -720,7 +760,7 @@
           card.innerHTML = `
             <div class="compactMain">${compactMainLine(r)}</div>
             <div class="line" style="gap:6px;flex-wrap:wrap">
-              <span class="pill info">${typeEmoji(r.Type)}</span>
+              <span class="pill info">${escapeHtml(displayType(r.Type))}</span>
               <span class="pill info">${r.DriverCode || r.VehicleCode ? "📅" : "📝"}</span>
               <span class="pill ${r.Status==="CANCELLED" ? "bad" : "ok"}">${r.Status==="CONFIRMED" ? "✅" : (r.Status==="PENDING" ? "⏳" : "❌")}</span>
             </div>
@@ -741,6 +781,70 @@
 
       g.appendChild(day);
     }
+  }
+
+
+  function renderDispatchBoard(){
+    const wrap = $("dispatchView");
+    const dates = windowDates();
+    const todayKey = ymd(new Date());
+    const confirmed = items.filter(r=>r.Status === "CONFIRMED");
+
+    const byDay = {};
+    dates.forEach(d=> byDay[ymd(d)] = []);
+    confirmed.forEach(r=>{
+      const k = ymd(new Date(r.StartDT));
+      if(byDay[k]) byDay[k].push(r);
+    });
+
+    const chunks = [];
+    for(const d of dates){
+      const key = ymd(d);
+      const dayItems = (byDay[key] || []).slice().sort((a,b)=>new Date(a.StartDT)-new Date(b.StartDT));
+      const groups = {};
+      dayItems.forEach(r=>{
+        const gkey = `${r.DriverCode || "—"}__${r.VehicleCode || "—"}`;
+        if(!groups[gkey]) groups[gkey] = {driver:r.DriverCode || "—", vehicle:r.VehicleCode || "—", items:[]};
+        groups[gkey].items.push(r);
+      });
+
+      const groupHtml = Object.values(groups).map(g=>`
+        <div class="dispatchGroup">
+          <div class="dispatchHead">
+            <div><b>${escapeHtml(g.driver)}</b> • ${escapeHtml(g.vehicle)}</div>
+            <div class="small">${g.items.length} trip${g.items.length>1?"s":""}</div>
+          </div>
+          <div class="dispatchItems">
+            ${g.items.map(r=>`<div class="dispatchItem click" data-open="${escapeAttr(r.RequestID)}"><div class="compactMain">${compactMainLine(r)}</div><div class="small" style="margin-top:4px">🕒 ${escapeHtml(new Date(r.StartDT).toLocaleTimeString(undefined,{hour:"2-digit",minute:"2-digit"}))}–${escapeHtml(new Date(r.EndDT).toLocaleTimeString(undefined,{hour:"2-digit",minute:"2-digit"}))}</div></div>`).join("")}
+          </div>
+        </div>
+      `).join("") || `<div class="small">No confirmed dispatches.</div>`;
+
+      chunks.push(`
+        <div class="dispatchDay">
+          <div class="day ${key===todayKey ? "today" : ""}" style="min-height:auto">
+            <div class="dayHead">
+              <div class="h">${d.toLocaleDateString(undefined,{weekday:"long"})}${key===todayKey ? " • Today" : ""}</div>
+              <div class="s">${d.toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"})}</div>
+            </div>
+            <div class="dayBody">${groupHtml}</div>
+          </div>
+        </div>
+      `);
+    }
+
+    wrap.innerHTML = chunks.join("");
+    wrap.querySelectorAll("[data-open]").forEach(el=>{
+      el.addEventListener("click", ()=>{
+        const r = items.find(x=>x.RequestID === el.dataset.open);
+        if(r) openDetailModal(r);
+      });
+    });
+  }
+
+  function renderCurrentTab(){
+    renderCalendar();
+    renderDispatchBoard();
   }
 
   function setTypeFields(type){
@@ -944,7 +1048,7 @@
     const startISO = dates[0].toISOString();
     const data = await api("publicSchedule", { startISO });
     items = data.items || [];
-    render();
+    renderCurrentTab();
   }
 
   $("btnPrev").addEventListener("click", async ()=>{ offsetWeeks -= 2; await load(); });
@@ -975,6 +1079,16 @@
   document.querySelectorAll("[data-time]").forEach(btn=>{
     btn.addEventListener("click", ()=>{
       $("fTime").value = btn.dataset.time;
+    });
+  });
+
+  document.querySelectorAll("[data-tab]").forEach(tab=>{
+    tab.addEventListener("click", ()=>{
+      document.querySelectorAll("[data-tab]").forEach(x=>x.classList.remove("active"));
+      tab.classList.add("active");
+      const which = tab.dataset.tab;
+      $("cal").style.display = which === "calendar" ? "" : "none";
+      $("dispatchView").style.display = which === "dispatch" ? "" : "none";
     });
   });
 
