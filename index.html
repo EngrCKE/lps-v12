@@ -596,6 +596,7 @@
         ` : `
           <div class="detailBox">
             <div class="small"><b>Name:</b> ${escapeHtml(item.RequestedBy || "—")}</div>
+            <div class="small"><b>Client Name:</b> ${escapeHtml(p.ClientName || "—")}</div>
             <div class="small"><b>Destination:</b> ${escapeHtml(p.Destination || "—")}</div>
             <div class="small"><b>Purpose:</b> ${escapeHtml(p.Purpose || "—")}</div>
             <div class="small"><b>Required Vehicle:</b> ${escapeHtml(p.RequiredVehicle || "—")}</div>
@@ -678,7 +679,7 @@
                 ? `<div class="small">${escapeHtml(p.Items || "—")}</div>`
                 : r.Type === "Travel"
                 ? ``
-                : `<div class="small">${escapeHtml(p.Purpose || "—")}${p.RequiredVehicle ? " • " + escapeHtml(p.RequiredVehicle) : ""}</div>`
+                : `${p.ClientName ? `<div class="small"><b>Client:</b> ${escapeHtml(p.ClientName)}</div>` : ``}<div class="small">${escapeHtml(p.Purpose || "—")}${p.RequiredVehicle ? " • " + escapeHtml(p.RequiredVehicle) : ""}</div>`
             }
 
             ${notes ? `<div class="small">📝 ${escapeHtml(notes)}</div>` : ""}
@@ -753,6 +754,10 @@
 
     wrap.innerHTML = `
       <div class="twoCol">
+        <div>
+          <label>Client Name (optional)</label>
+          <input id="pClient" placeholder="Client name (optional)" />
+        </div>
         <div>
           <label>Destination</label>
           <input id="pDestination" placeholder="Destination" />
@@ -848,6 +853,7 @@
       };
     } else {
       payload = {
+        ClientName: getValue("pClient"),
         Destination: getValue("pDestination"),
         Purpose: getValue("pPurpose"),
         RequiredVehicle: getValue("pVehicleReq"),
