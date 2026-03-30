@@ -586,20 +586,20 @@
   }
 
   function displayType(type){
-    return type === "Travel" || type === "Client Call" ? "Client Call" : (type || "");
+    return type === "Client Call" || type === "Client Call" ? "Client Call" : (type || "");
   }
 
     function titleFor(r){
     const p = r.Payload || {};
     if(r.Type==="Delivery") return `${p.SONumber || "SO ?"} • ${p.ClientName || ""}`.trim();
-    if(r.Type==="Travel" || r.Type==="Client Call") return `${p.ClientName || ""} • ${p.Destination || ""}`.trim();
+    if(r.Type==="Client Call" || r.Type==="Client Call") return `${p.ClientName || ""} • ${p.Destination || ""}`.trim();
     return `${p.Purpose || "Service"} • ${p.Destination || ""}`.trim();
   }
 
   function subtitleFor(r){
     const p = r.Payload || {};
     if(r.Type==="Delivery") return `${p.Address || ""}`.trim();
-    if(r.Type==="Travel" || r.Type==="Client Call") return `${p.Destination || ""}`.trim();
+    if(r.Type==="Client Call" || r.Type==="Client Call") return `${p.Destination || ""}`.trim();
     return `${p.RequiredVehicle ? ("Vehicle: " + p.RequiredVehicle + " • ") : ""}${p.Destination || ""}`.trim();
   }
 
@@ -641,7 +641,7 @@
   function compactMainLine(r){
     const p = r.Payload || {};
     if(r.Type === "Delivery") return [p.SONumber, p.ClientName, p.Address].filter(Boolean).map(escapeHtml).map(x=>`<b>${x}</b>`).join(" • ") || `<b>Delivery</b>`;
-    if(r.Type === "Travel" || r.Type === "Client Call") return [p.ClientName, p.Destination].filter(Boolean).map(escapeHtml).map(x=>`<b>${x}</b>`).join(" • ") || `<b>Client Call</b>`;
+    if(r.Type === "Client Call" || r.Type === "Client Call") return [p.ClientName, p.Destination].filter(Boolean).map(escapeHtml).map(x=>`<b>${x}</b>`).join(" • ") || `<b>Client Call</b>`;
     return [p.ClientName, p.Destination, p.Purpose].filter(Boolean).map(escapeHtml).map(x=>`<b>${x}</b>`).join(" • ") || `<b>Service</b>`;
   }
 
@@ -686,7 +686,7 @@
             ${installerHtml}
             ${p.Notes ? `<div class="small" style="margin-top:8px"><b>Special Instructions:</b> ${escapeHtml(p.Notes)}</div>` : ""}
           </div>
-        ` : (item.Type === "Travel" || item.Type === "Client Call") ? `
+        ` : (item.Type === "Client Call" || item.Type === "Client Call") ? `
           <div class="detailBox">
             <div class="small"><b>Name:</b> ${escapeHtml(item.RequestedBy || "—")}</div>
             <div class="small"><b>Client Name:</b> ${escapeHtml(p.ClientName || "—")}</div>
@@ -886,7 +886,7 @@
       return;
     }
 
-    if(type === "Travel" || type === "Client Call"){
+    if(type === "Client Call" || type === "Client Call"){
       wrap.innerHTML = `
         <div class="twoCol">
           <div>
@@ -962,7 +962,7 @@
       if(!getValue("pItems")) errs.push("Items to Deliver is required.");
     }
 
-    if(type === "Travel" || type === "Client Call"){
+    if(type === "Client Call" || type === "Client Call"){
       if(!getValue("pClient")) errs.push("Client Name is required.");
       if(!getValue("pDestination")) errs.push("Destination is required.");
     }
@@ -999,7 +999,7 @@
         Items: getValue("pItems"),
         Notes: getValue("pNotes")
       };
-    } else if(type === "Travel" || type === "Client Call"){
+    } else if(type === "Client Call" || type === "Client Call"){
       payload = {
         ClientName: getValue("pClient"),
         Destination: getValue("pDestination"),
