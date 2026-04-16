@@ -586,7 +586,26 @@
   }
 
   function displayType(type){
-    return type === "Client Call" || type === "Client Call" ? "Client Call" : (type || "");
+    return type === "Travel" || type === "Client Call" ? "Client Call" : (type || "");
+  }
+
+
+  function tripStatusLabel(r){
+    return String(r.TripStatus || "READY").trim() || "READY";
+  }
+
+  function tripStatusPill(r){
+    const st = tripStatusLabel(r);
+    if(st === "IN_TRANSIT") return `<span class="pill info">🚚 In Transit</span>`;
+    if(st === "ARRIVED") return `<span class="pill ok">📍 Arrived</span>`;
+    return `<span class="pill">Ready</span>`;
+  }
+
+  function tripTimesHTML(r){
+    const bits = [];
+    if(r.DepartedAt) bits.push(`Start: ${new Date(r.DepartedAt).toLocaleString()}`);
+    if(r.ArrivedAt) bits.push(`End: ${new Date(r.ArrivedAt).toLocaleString()}`);
+    return bits.join(" • ") || "No trip log yet";
   }
 
     function titleFor(r){
@@ -672,6 +691,8 @@
           <div class="small"><b>Time:</b> ${escapeHtml(st.toLocaleTimeString(undefined,{hour:"2-digit",minute:"2-digit"}))}–${escapeHtml(en.toLocaleTimeString(undefined,{hour:"2-digit",minute:"2-digit"}))}</div>
           <div class="small"><b>Driver:</b> ${escapeHtml(item.DriverCode || "—")}${dName ? " — " + escapeHtml(dName) : ""}</div>
           <div class="small"><b>Vehicle:</b> ${escapeHtml(item.VehicleCode || "—")}${vLabel ? " — " + escapeHtml(vLabel) : ""}</div>
+          <div class="small"><b>Trip:</b> ${escapeHtml(tripStatusLabel(item))}</div>
+          <div class="small"><b>Trip Log:</b> ${escapeHtml(tripTimesHTML(item))}</div>
         </div>
       </div>
 
@@ -682,6 +703,7 @@
             <div class="small"><b>Client Name:</b> ${escapeHtml(p.ClientName || "—")}</div>
             <div class="small"><b>Contact Number:</b> ${escapeHtml(p.ContactNumber || "—")}</div>
             <div class="small"><b>Delivery Address:</b> ${escapeHtml(p.Address || "—")}</div>
+            <div class="small"><b>Area:</b> ${escapeHtml(p.AreaClass || "—")}</div>
             <div class="small"><b>Items to Deliver:</b> ${escapeHtml(p.Items || "—")}</div>
             ${installerHtml}
             ${p.Notes ? `<div class="small" style="margin-top:8px"><b>Special Instructions:</b> ${escapeHtml(p.Notes)}</div>` : ""}
@@ -691,6 +713,7 @@
             <div class="small"><b>Name:</b> ${escapeHtml(item.RequestedBy || "—")}</div>
             <div class="small"><b>Client Name:</b> ${escapeHtml(p.ClientName || "—")}</div>
             <div class="small"><b>Destination:</b> ${escapeHtml(p.Destination || "—")}</div>
+            <div class="small"><b>Area:</b> ${escapeHtml(p.AreaClass || "—")}</div>
             ${installerHtml}
             ${p.Notes ? `<div class="small" style="margin-top:8px"><b>Special Instructions:</b> ${escapeHtml(p.Notes)}</div>` : ""}
           </div>
@@ -699,6 +722,7 @@
             <div class="small"><b>Name:</b> ${escapeHtml(item.RequestedBy || "—")}</div>
             <div class="small"><b>Client Name:</b> ${escapeHtml(p.ClientName || "—")}</div>
             <div class="small"><b>Destination:</b> ${escapeHtml(p.Destination || "—")}</div>
+            <div class="small"><b>Area:</b> ${escapeHtml(p.AreaClass || "—")}</div>
             <div class="small"><b>Purpose:</b> ${escapeHtml(p.Purpose || "—")}</div>
             <div class="small"><b>Required Vehicle:</b> ${escapeHtml(p.RequiredVehicle || "—")}</div>
             ${installerHtml}
@@ -767,9 +791,11 @@
               <span class="pill info">${escapeHtml(displayType(r.Type))}</span>
               <span class="pill info">${r.DriverCode || r.VehicleCode ? "📅" : "📝"}</span>
               <span class="pill ${r.Status==="CANCELLED" ? "bad" : "ok"}">${r.Status==="CONFIRMED" ? "✅" : (r.Status==="PENDING" ? "⏳" : "❌")}</span>
+              ${tripStatusPill(r)}
             </div>
             <div class="compactMeta">
               <span>🕒 ${escapeHtml(st.toLocaleTimeString(undefined,{hour:"2-digit",minute:"2-digit"}))}–${escapeHtml(en.toLocaleTimeString(undefined,{hour:"2-digit",minute:"2-digit"}))}</span>
+              <span>${escapeHtml(tripTimesHTML(r))}</span>
               <span>👤 ${escapeHtml(r.DriverCode || "—")}</span>
               <span>🚚 ${escapeHtml(r.VehicleCode || "—")}</span>
             </div>
@@ -819,7 +845,7 @@
             <div class="small">${g.items.length} trip${g.items.length>1?"s":""}</div>
           </div>
           <div class="dispatchItems">
-            ${g.items.map(r=>`<div class="dispatchItem click" data-open="${escapeAttr(r.RequestID)}"><div class="compactMain">${compactMainLine(r)}</div><div class="small" style="margin-top:4px">🕒 ${escapeHtml(new Date(r.StartDT).toLocaleTimeString(undefined,{hour:"2-digit",minute:"2-digit"}))}–${escapeHtml(new Date(r.EndDT).toLocaleTimeString(undefined,{hour:"2-digit",minute:"2-digit"}))}</div></div>`).join("")}
+            ${g.items.map(r=>`<div class="dispatchItem click" data-open="${escapeAttr(r.RequestID)}"><div class="compactMain">${compactMainLine(r)}</div><div class="small" style="margin-top:4px">🕒 ${escapeHtml(new Date(r.StartDT).toLocaleTimeString(undefined,{hour:"2-digit",minute:"2-digit"}))}–${escapeHtml(new Date(r.EndDT).toLocaleTimeString(undefined,{hour:"2-digit",minute:"2-digit"}))}</div><div class="small" style="margin-top:4px">${tripStatusLabel(r)} • ${escapeHtml(tripTimesHTML(r))}</div></div>`).join("")}
           </div>
         </div>
       `).join("") || `<div class="small">No confirmed dispatches.</div>`;
@@ -873,6 +899,10 @@
             <label>Delivery Address</label>
             <input id="pAddress" placeholder="Delivery address" />
           </div>
+          <div>
+            <label>Area</label>
+            <select id="pAreaClass"><option value="NON_NCR">Non-NCR</option><option value="NCR">NCR</option></select>
+          </div>
         </div>
         <div>
           <label>Items to Deliver</label>
@@ -896,6 +926,10 @@
           <div>
             <label>Destination</label>
             <input id="pDestination" placeholder="Destination" />
+          </div>
+          <div>
+            <label>Area</label>
+            <select id="pAreaClass"><option value="NON_NCR">Non-NCR</option><option value="NCR">NCR</option></select>
           </div>
         </div>
         <div>
@@ -997,13 +1031,15 @@
         ContactNumber: getValue("pContact"),
         Address: getValue("pAddress"),
         Items: getValue("pItems"),
-        Notes: getValue("pNotes")
+        Notes: getValue("pNotes"),
+        AreaClass: getValue("pAreaClass") || "NON_NCR"
       };
     } else if(type === "Client Call" || type === "Client Call"){
       payload = {
         ClientName: getValue("pClient"),
         Destination: getValue("pDestination"),
-        Notes: getValue("pNotes")
+        Notes: getValue("pNotes"),
+        AreaClass: getValue("pAreaClass") || "NON_NCR"
       };
     } else {
       payload = {
@@ -1011,7 +1047,8 @@
         Destination: getValue("pDestination"),
         Purpose: getValue("pPurpose"),
         RequiredVehicle: getValue("pVehicleReq"),
-        Notes: getValue("pNotes")
+        Notes: getValue("pNotes"),
+        AreaClass: getValue("pAreaClass") || "NON_NCR"
       };
     }
 
