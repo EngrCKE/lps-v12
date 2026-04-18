@@ -577,9 +577,33 @@
     return j;
   }
 
+  function formatPhoneNumber(raw){
+    const digits = String(raw || "").replace(/\D/g, "");
+    const local = digits.length === 11 && digits.startsWith("0")
+      ? digits
+      : (digits.length === 10 && digits.startsWith("9") ? "0" + digits : digits);
+    if(local.length === 11 && local.startsWith("0")){
+      return `${local.slice(0,4)} ${local.slice(4,7)} ${local.slice(7,11)}`;
+    }
+    return String(raw || "").trim();
+  }
+
+  function getDriver(code){
+    return (BOOT.drivers || []).find(x => String(x.DriverCode || "") === String(code || "")) || null;
+  }
+
   function driverName(code){
-    const d = (BOOT.drivers||[]).find(x=>x.DriverCode===code);
-    return d ? d.DriverName : "";
+    const d = getDriver(code);
+    return d ? String(d.DriverName || "").trim() : "";
+  }
+
+  function driverDisplay(code){
+    const d = getDriver(code);
+    if(!d) return String(code || "—").trim() || "—";
+    const name = String(d.DriverName || "").trim();
+    const phone = formatPhoneNumber(d.DriverPhone || d.DriverCode || code || "");
+    if(name && phone) return `${name} - ${phone}`;
+    return name || phone || String(code || "—").trim() || "—";
   }
 
   function vehicleLabel(code){
@@ -721,7 +745,7 @@
         <div class="detailBox">
           <div class="small"><b>Date:</b> ${escapeHtml(st.toLocaleDateString())}</div>
           <div class="small"><b>Time:</b> ${escapeHtml(st.toLocaleTimeString(undefined,{hour:"2-digit",minute:"2-digit"}))}–${escapeHtml(en.toLocaleTimeString(undefined,{hour:"2-digit",minute:"2-digit"}))}</div>
-          <div class="small"><b>Driver:</b> ${escapeHtml(item.DriverCode || "—")}${dName ? " — " + escapeHtml(dName) : ""}</div>
+          <div class="small"><b>Driver:</b> ${escapeHtml(driverDisplay(item.DriverCode))}</div>
           <div class="small"><b>Vehicle:</b> ${escapeHtml(item.VehicleCode || "—")}${vLabel ? " — " + escapeHtml(vLabel) : ""}</div>
           <div class="small"><b>Trip:</b> ${escapeHtml(tripStatusLabel(item))}</div>
           <div class="small"><b>Trip Log:</b> ${escapeHtml(tripTimesHTML(item))}</div>
@@ -828,7 +852,7 @@
             <div class="compactMeta">
               <span>🕒 ${escapeHtml(st.toLocaleTimeString(undefined,{hour:"2-digit",minute:"2-digit"}))}–${escapeHtml(en.toLocaleTimeString(undefined,{hour:"2-digit",minute:"2-digit"}))}</span>
               <span>${escapeHtml(tripTimesHTML(r))}</span>
-              <span>👤 ${escapeHtml(r.DriverCode || "—")}</span>
+              <span>👤 ${escapeHtml(driverDisplay(r.DriverCode))}</span>
               <span>🚚 ${escapeHtml(r.VehicleCode || "—")}</span>
             </div>
           `;
@@ -866,14 +890,14 @@
       const groups = {};
       dayItems.forEach(r=>{
         const gkey = `${r.DriverCode || "—"}__${r.VehicleCode || "—"}`;
-        if(!groups[gkey]) groups[gkey] = {driver:r.DriverCode || "—", vehicle:r.VehicleCode || "—", items:[]};
+        if(!groups[gkey]) groups[gkey] = {driver:r.DriverCode || "—", driverDisplay:driverDisplay(r.DriverCode), vehicle:r.VehicleCode || "—", items:[]};
         groups[gkey].items.push(r);
       });
 
       const groupHtml = Object.values(groups).map(g=>`
         <div class="dispatchGroup">
           <div class="dispatchHead">
-            <div><b>${escapeHtml(g.driver)}</b> • ${escapeHtml(g.vehicle)}</div>
+            <div><b>${escapeHtml(g.driverDisplay || g.driver)}</b> • ${escapeHtml(g.vehicle)}</div>
             <div class="small">${g.items.length} trip${g.items.length>1?"s":""}</div>
           </div>
           <div class="dispatchItems">
