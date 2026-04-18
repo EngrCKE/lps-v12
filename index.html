@@ -3,22 +3,22 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>SJTC Logistics Staff Portal</title>
+  <title>Logistics Planning System v1.2 — Admin</title>
   <style>
     :root{
       --bg:#0f2e22;
       --panel:#163b2c;
       --panel2:#1b4a37;
       --txt:#f4f1e8;
-      --muted:#cfc8b8;
+      --muted:#d6ccb7;
       --accent:#3fae73;
-      --ok:#49d18c;
-      --bad:#d96c6c;
-      --warn:#d4a95c;
 
       --beige:#f3e9d7;
-      --beige2:#efe2ca;
       --beigeBorder:#d7c8ad;
+
+      --ok:#49d18c;
+      --bad:#ff8080;
+      --warn:#ffd27a;
     }
 
     *{box-sizing:border-box}
@@ -34,7 +34,7 @@
       position:sticky;
       top:0;
       z-index:10;
-      background:rgba(15,46,34,.88);
+      background:rgba(15,46,34,.86);
       backdrop-filter:blur(10px);
       border-bottom:1px solid rgba(255,255,255,.08);
       padding:14px;
@@ -58,44 +58,48 @@
       border-radius:999px;
     }
 
-    button, select, input, textarea{
-      font:inherit;
+    button,select,input,textarea{
+      background:rgba(255,255,255,.06);
+      color:var(--txt);
+      border:1px solid rgba(255,255,255,.14);
       border-radius:12px;
       padding:10px 12px;
+      font:inherit;
       outline:none;
     }
 
-    button{
-      background:var(--panel2);
-      color:var(--txt);
-      border:1px solid rgba(255,255,255,.15);
-      cursor:pointer;
-    }
-
-    button.primary{
-      background:rgba(63,174,115,.18);
-      border-color:rgba(63,174,115,.55);
-    }
-
-    button.ok{
-      background:rgba(73,209,140,.14);
-      border-color:rgba(73,209,140,.55);
-    }
-
-    button.danger{
-      background:rgba(217,108,108,.14);
-      border-color:rgba(217,108,108,.55);
-    }
-
-    button:disabled{
-      opacity:.5;
-      cursor:not-allowed;
-    }
+    button{cursor:pointer}
+    button.primary{background:rgba(63,174,115,.18);border-color:rgba(63,174,115,.55)}
+    button.ok{background:rgba(73,209,140,.14);border-color:rgba(73,209,140,.55)}
+    button.danger{background:rgba(255,128,128,.14);border-color:rgba(255,128,128,.55)}
+    button:disabled{opacity:.5;cursor:not-allowed}
 
     main{
       padding:14px;
-      max-width:1300px;
+      max-width:1400px;
       margin:0 auto;
+    }
+
+    .tabs{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin:10px 0 14px;
+    }
+
+    .tab{
+      padding:8px 10px;
+      border-radius:999px;
+      border:1px solid rgba(63,174,115,.38);
+      background:rgba(63,174,115,.12);
+      color:var(--txt);
+      cursor:pointer;
+    }
+
+    .tab.active{
+      border-color:rgba(63,174,115,.58);
+      background:rgba(63,174,115,.18);
+      color:var(--txt);
     }
 
     .panel{
@@ -134,8 +138,13 @@
       border-color:var(--beigeBorder);
     }
 
+    .day.today .dayHead{
+      border-bottom:1px solid rgba(27,42,34,.12);
+    }
+
     .day.today .dayHead .h,
-    .day.today .dayHead .s{
+    .day.today .dayHead .s,
+    .day.today .hint{
       color:#4d4636;
     }
 
@@ -146,18 +155,29 @@
 
     .day.today .compactMain,
     .day.today .compactMeta,
-    .day.today .pill,
-    .day.today .small,
-    .day.today .dispatchGroup,
-    .day.today .dispatchItem,
-    .day.today .dispatchHead{
+    .day.today .pill{
       color:var(--txt);
     }
 
     .day.today .dispatchGroup,
-    .day.today .dispatchItem{
-      background:rgba(15,46,34,.72);
-      border:1px solid rgba(15,46,34,.34);
+    .day.today .dispatchItem,
+    .day.today .summaryBox,
+    .day.today .insightBox{
+      background:rgba(15,46,34,.82);
+      border-color:rgba(15,46,34,.42);
+    }
+
+    .day.today .dispatchHead > div:first-child,
+    .day.today .dispatchItem .compactMain,
+    .day.today .summaryGrid .small b{
+      color:var(--txt);
+    }
+
+    .day.today .dispatchHead .small,
+    .day.today .dispatchItem .small,
+    .day.today .summaryGrid .small,
+    .day.today .compactMeta{
+      color:#d9e7df;
     }
 
     .dayHead{
@@ -187,17 +207,17 @@
     .card{
       border:1px solid rgba(255,255,255,.12);
       border-radius:14px;
-      padding:8px;
+      padding:8px 9px;
       background:rgba(15,46,34,.35);
       display:flex;
       flex-direction:column;
       gap:3px;
-      cursor:pointer;
     }
 
     .compactMain{
       font-size:12px;
       line-height:1.28;
+      color:var(--txt);
       overflow:hidden;
       display:-webkit-box;
       -webkit-line-clamp:2;
@@ -212,6 +232,53 @@
       gap:8px;
       flex-wrap:wrap;
     }
+
+    .summaryBox, .insightBox, .dispatchGroup, .dispatchItem{
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:14px;
+      background:rgba(255,255,255,.04);
+    }
+
+    .summaryBox, .insightBox{padding:10px 12px;}
+
+    .summaryGrid{
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:8px 12px;
+    }
+
+    .summaryGrid .small b{color:var(--txt);}
+
+    .insightList{margin:6px 0 0 18px;padding:0;display:grid;gap:4px;}
+
+    .dispatchDay{display:grid;gap:10px;margin-bottom:14px;}
+    .dispatchGroup{padding:10px 12px;}
+    .dispatchItems{display:grid;gap:8px;margin-top:8px;}
+    .dispatchItem{padding:8px 10px;}
+    .dispatchHead{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center;}
+
+    .mobileOnly{display:none;}
+    .headerTop,.headerControls,.filterRow,.navRow{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+    .headerControls{margin-top:10px;justify-content:space-between;}
+
+    @media (max-width: 820px){
+      header{padding:10px;}
+      .mobileOnly{display:inline-flex;}
+      .hideOnMobile{display:none !important;}
+      .headerControls{display:none;gap:8px;}
+      .headerControls.open{display:flex;flex-direction:column;align-items:stretch;}
+      .headerControls .searchBox{min-width:0;width:100%;}
+      .filterRow, .navRow{width:100%;}
+      .filterRow > *, .navRow > *{flex:1 1 calc(50% - 6px);min-width:0;}
+      .navRow #btnNew, .navRow #btnPin{flex:1 1 calc(50% - 6px);}
+      .headerTop{gap:8px;}
+    }
+
+    @media (max-width: 700px){
+      .summaryGrid{grid-template-columns:1fr;}
+    }
+
+    .click{cursor:pointer}
 
     .line{
       display:flex;
@@ -233,8 +300,13 @@
       color:#d6ffe9;
     }
 
+    .pill.warn{
+      border-color:rgba(255,210,122,.55);
+      color:#ffe8b7;
+    }
+
     .pill.bad{
-      border-color:rgba(217,108,108,.55);
+      border-color:rgba(255,128,128,.55);
       color:#ffd6d6;
     }
 
@@ -253,8 +325,32 @@
       color:var(--muted);
     }
 
-    .toolbar{
-      margin-bottom:12px;
+    table{
+      width:100%;
+      border-collapse:collapse;
+    }
+
+    th,td{
+      border-bottom:1px solid rgba(255,255,255,.10);
+      padding:10px 8px;
+      text-align:left;
+      font-size:13px;
+      vertical-align:top;
+    }
+
+    th{
+      color:var(--muted);
+      font-weight:800;
+    }
+
+    .twoCol{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+    }
+
+    @media (max-width: 780px){
+      .twoCol{grid-template-columns:1fr}
     }
 
     .modalBg{
@@ -269,10 +365,10 @@
     }
 
     .modal{
-      width:min(900px,100%);
-      max-height:90vh;
+      width:min(980px,100%);
+      max-height:92vh;
       overflow:auto;
-      background:rgba(22,59,44,.98);
+      background:rgba(22,59,44,.96);
       border:1px solid rgba(255,255,255,.14);
       border-radius:18px;
     }
@@ -285,7 +381,7 @@
       align-items:center;
       position:sticky;
       top:0;
-      background:rgba(22,59,44,.98);
+      background:rgba(22,59,44,.96);
       z-index:1;
     }
 
@@ -304,17 +400,7 @@
       flex-wrap:wrap;
       position:sticky;
       bottom:0;
-      background:rgba(22,59,44,.98);
-    }
-
-    .twoCol{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:10px;
-    }
-
-    @media (max-width: 780px){
-      .twoCol{grid-template-columns:1fr}
+      background:rgba(22,59,44,.96);
     }
 
     label{
@@ -327,77 +413,82 @@
     .modal input,
     .modal select,
     .modal textarea{
-      width:100%;
       background:var(--beige);
       color:#1b2a22;
       border:1px solid var(--beigeBorder);
+      width:100%;
     }
 
-    textarea{
+    .modal textarea{
       min-height:90px;
       resize:vertical;
     }
 
-    .presetRow{
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-      margin-top:6px;
-    }
+    .searchBox{min-width:280px}
 
-    .presetBtn{
-      padding:6px 10px;
-      border-radius:999px;
-      font-size:12px;
-    }
 
-    .detailBox{
-      border:1px solid rgba(255,255,255,.10);
-      border-radius:14px;
-      padding:10px;
-      background:rgba(255,255,255,.04);
-    }
-
-    .detailGrid{
+    .appShell{
       display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:10px;
+      grid-template-columns:minmax(0,1fr) 340px;
+      gap:14px;
+      align-items:start;
     }
 
-    @media (max-width: 780px){
-      .detailGrid{grid-template-columns:1fr}
+    .contentArea{min-width:0;}
+    .sideRail{
+      position:sticky;
+      top:88px;
+      display:grid;
+      gap:12px;
     }
 
-
-    .tabs{
+    .sideSection .sectionHead{
       display:flex;
+      align-items:center;
+      justify-content:space-between;
       gap:8px;
-      margin:12px 0;
-      flex-wrap:wrap;
-    }
-
-    .tab{
-      padding:9px 14px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.12);
-      background:rgba(255,255,255,.05);
+      margin-bottom:10px;
       cursor:pointer;
+    }
+
+    .sideSection .sectionBody{display:block;}
+    .sideSection.collapsed .sectionBody{display:none;}
+
+    .badge.attn{
+      color:#ffe8b7;
+      border-color:rgba(255,210,122,.55);
+    }
+
+    .day.selected{
+      outline:2px solid rgba(63,174,115,.85);
+      outline-offset:2px;
+    }
+
+    .dayPickHint{margin-bottom:8px;}
+    .resourceList{
+      display:grid;
+      gap:6px;
+      margin-top:8px;
+    }
+    .resourceItem{
+      padding:8px 10px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.04);
+      font-size:12px;
       color:var(--txt);
-      font-weight:800;
-      font-size:13px;
     }
-
-    .tab.active{
-      background:var(--panel2);
-      border-color:rgba(255,255,255,.18);
+    .resourceItem.warn{
+      border-color:rgba(255,210,122,.45);
+      background:rgba(255,210,122,.08);
     }
+    .mutedLine{font-size:12px;color:var(--muted);}
+    .refreshBadge{min-width:115px;text-align:center;}
 
-    .dispatchDay{display:grid;gap:10px;margin-bottom:14px;}
-    .dispatchGroup{padding:10px 12px;border-radius:14px;background:rgba(255,255,255,.04);}
-    .dispatchItems{display:grid;gap:8px;margin-top:8px;}
-    .dispatchItem{padding:8px 10px;border-radius:12px;background:rgba(255,255,255,.03);}
-    .dispatchHead{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center;}
-
+    @media (max-width: 1100px){
+      .appShell{grid-template-columns:1fr;}
+      .sideRail{position:static;}
+    }
 
     footer{
       margin-top:18px;
@@ -410,50 +501,162 @@
 </head>
 <body>
 <header>
-  <div class="row">
-    <div class="title">SJTC Logistics Staff Portal</div>
-    <span class="badge" id="range">Loading…</span>
-    <span class="badge" id="refreshBadge">Sync idle</span>
+  <div class="headerTop">
+    <div class="title">Logistics Planning System v1.2 — Admin</div>
+    <span class="badge hideOnMobile" id="rangeBadge">Not loaded</span>
+    <span class="badge hideOnMobile">2-week rolling (Mon start)</span>
+    <span class="badge" id="pinBadge">PIN: not set</span>
+    <span class="badge refreshBadge" id="refreshBadge">Sync idle</span>
     <div class="spacer"></div>
-    <button id="btnPrev">← Prev</button>
-    <button id="btnCurrent">Current 2 weeks</button>
-    <button id="btnNext">Next →</button>
-    <button class="primary" id="btnNewRequest">+ Submit Request</button>
+    <button type="button" id="btnMobileControls" class="mobileOnly">Controls</button>
+  </div>
+
+  <div class="headerControls" id="headerControls">
+    <input class="searchBox" id="q" placeholder="Search: SO#, Client, Destination, Requestor..." />
+
+    <div class="filterRow">
+      <select id="statusFilter"></select>
+      <select id="typeFilter"></select>
+      <select id="schedFilter">
+        <option value="ALL">All</option>
+        <option value="SCHEDULED" selected>Scheduled</option>
+        <option value="UNSCHEDULED">Unscheduled</option>
+      </select>
+      <select id="driverFilter"></select>
+      <select id="vehicleFilter"></select>
+    </div>
+
+    <div class="navRow">
+      <button id="btnPrev">← Prev</button>
+      <button class="primary" id="btnToday">Current 2 weeks</button>
+      <button id="btnNext">Next →</button>
+      <button class="primary" id="btnNew">+ New Request</button>
+      <button class="primary" id="btnPin">Set PIN</button>
+    </div>
   </div>
 </header>
 
 <main>
-  <div class="panel toolbar">
-    <div class="line" style="justify-content:space-between">
-      <div class="hint">Tap a confirmed schedule to view full details.</div>
-      <div class="hint">Requests submitted here go to the logistics manager as <b>PENDING</b>.</div>
-    </div>
-  </div>
-
   <div class="tabs">
-    <div class="tab active" data-tab="calendar">Calendar</div>
+    <div class="tab active" data-tab="calendar">2-week Plan</div>
+    <div class="tab" data-tab="inbox">Inbox (Pending)</div>
+    <div class="tab" data-tab="all">All (Window)</div>
     <div class="tab" data-tab="dispatch">Dispatch</div>
   </div>
 
-  <div class="panel" id="cal"></div>
-  <div class="panel" id="dispatchView" style="display:none;"></div>
+  <div class="appShell">
+    <div class="contentArea">
+      <div id="viewCalendar" class="panel"></div>
+      <div id="viewInbox" class="panel" style="display:none;"></div>
+      <div id="viewAll" class="panel" style="display:none;"></div>
+      <div id="viewDispatch" class="panel" style="display:none;"></div>
+    </div>
 
-  <footer>© 2026 Focolare Carpentry / SJTC Manufacturing Inc. • Developed by <b>Engr. CK Empeynado</b></footer>
+    <aside class="sideRail">
+      <div class="panel sideSection" id="sideInboxSection">
+        <div class="sectionHead" id="toggleSideInbox">
+          <div style="font-weight:900">Inbox</div>
+          <div class="line">
+            <span class="badge attn" id="sidePendingBadge">0 pending</span>
+            <span class="badge" id="sideInboxChevron">Hide</span>
+          </div>
+        </div>
+        <div class="sectionBody" id="sideInboxBody"></div>
+      </div>
+
+      <div class="panel sideSection" id="sideDaySection">
+        <div class="sectionHead" id="toggleSideDay">
+          <div style="font-weight:900">Selected Day</div>
+          <span class="badge" id="sideDayChevron">Hide</span>
+        </div>
+        <div class="sectionBody" id="sideDayBody">
+          <div class="hint dayPickHint">Click a day card to inspect available resources.</div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <footer>© 2026 Focolare Carpentry / SJTC Manufacturing Inc. • Created by <b>Engr. CK Empeynado</b></footer>
 </main>
 
-<!-- Request Modal -->
-<div class="modalBg" id="requestBg">
+
+<!-- Trip Modal -->
+<div class="modalBg" id="tripBg">
   <div class="modal">
     <div class="modalH">
-      <div style="font-weight:900">Submit Logistics Request</div>
+      <div style="font-weight:900">Trip Update</div>
+      <span class="badge" id="tripRid"></span>
       <div class="spacer"></div>
-      <span class="badge">Status: PENDING</span>
+      <span class="badge" id="tripCurrentStatus"></span>
+    </div>
+    <div class="modalB">
+      <div id="tripSummary" class="summaryBox"></div>
+      <div class="twoCol">
+        <div class="summaryBox">
+          <div class="small" style="font-weight:900;margin-bottom:8px">Start Time</div>
+          <div class="line" style="margin-bottom:8px">
+            <label><input type="radio" name="startMode" value="AUTO" checked> Auto</label>
+            <label><input type="radio" name="startMode" value="MANUAL"> Manual</label>
+          </div>
+          <input id="tripStartTime" type="datetime-local" disabled />
+          <div class="hint" style="margin-top:6px">Auto uses the current time when you confirm.</div>
+        </div>
+        <div class="summaryBox">
+          <div class="small" style="font-weight:900;margin-bottom:8px">End Time</div>
+          <div class="line" style="margin-bottom:8px">
+            <label><input type="radio" name="endMode" value="AUTO" checked> Auto</label>
+            <label><input type="radio" name="endMode" value="MANUAL"> Manual</label>
+          </div>
+          <input id="tripEndTime" type="datetime-local" disabled />
+          <div class="hint" style="margin-top:6px">Use Manual if you forgot to log the actual arrival time.</div>
+        </div>
+      </div>
+    </div>
+    <div class="modalF">
+      <button id="tripClose">Close</button>
+      <button class="primary" id="tripCorrect">Save Correction</button>
+      <button class="ok" id="tripStartBtn">Mark In Transit</button>
+      <button class="ok" id="tripEndBtn">Mark Arrived</button>
+    </div>
+  </div>
+</div>
+
+<!-- PIN Modal -->
+<div class="modalBg" id="pinBg">
+  <div class="modal">
+    <div class="modalH">
+      <div style="font-weight:900">Manager PIN</div>
+      <div class="spacer"></div>
+      <span class="badge">Stored on this device only</span>
+    </div>
+    <div class="modalB">
+      <div>
+        <label>Enter PIN</label>
+        <input id="pinInput" placeholder="e.g. 123456" />
+      </div>
+    </div>
+    <div class="modalF">
+      <button id="pinClose">Close</button>
+      <button class="ok" id="pinSave">Save PIN</button>
+    </div>
+  </div>
+</div>
+
+<!-- Request Modal -->
+<div class="modalBg" id="modalBg">
+  <div class="modal">
+    <div class="modalH">
+      <div style="font-weight:900" id="modalTitle">Request</div>
+      <span class="badge" id="modalRid"></span>
+      <div class="spacer"></div>
+      <span class="badge" id="modalTypeBadge"></span>
+      <span class="badge" id="modalSchedBadge"></span>
     </div>
 
     <div class="modalB">
       <div class="twoCol">
         <div>
-          <label>Request Type</label>
+          <label>Type</label>
           <select id="fType">
             <option>Delivery</option>
             <option>Client Call</option>
@@ -461,75 +664,75 @@
           </select>
         </div>
         <div>
-          <label>Requestor Name</label>
-          <input id="fRequestedBy" placeholder="Your name" />
+          <label>Status</label>
+          <select id="fStatus">
+            <option>PENDING</option>
+            <option>CONFIRMED</option>
+            <option>CANCELLED</option>
+          </select>
+        </div>
+        <div>
+          <label>Requestor</label>
+          <input id="fRequestedBy" />
+        </div>
+        <div>
+          <label>Start (Date & Time)</label>
+          <input id="fStart" type="datetime-local" />
+        </div>
+        <div>
+          <label>End (Date & Time)</label>
+          <input id="fEnd" type="datetime-local" />
+          <div class="hint">Minimum 4 hours is recommended.</div>
         </div>
       </div>
 
       <div class="twoCol">
         <div>
-          <label>Date</label>
-          <input id="fDate" type="date" />
-          <div class="presetRow">
-            <button class="presetBtn" type="button" id="btnTodayDate">Today</button>
-            <button class="presetBtn" type="button" id="btnTomorrowDate">Tomorrow</button>
-          </div>
+          <label>Assign Driver</label>
+          <select id="fDriver"></select>
         </div>
         <div>
-          <label>Time</label>
-          <input id="fTime" type="time" />
-          <div class="presetRow">
-            <button class="presetBtn" type="button" data-time="08:00">8:00</button>
-            <button class="presetBtn" type="button" data-time="09:00">9:00</button>
-            <button class="presetBtn" type="button" data-time="10:00">10:00</button>
-            <button class="presetBtn" type="button" data-time="13:00">1:00</button>
-            <button class="presetBtn" type="button" data-time="14:00">2:00</button>
-            <button class="presetBtn" type="button" data-time="15:00">3:00</button>
-          </div>
+          <label>Assign Vehicle</label>
+          <select id="fVehicle"></select>
+          <div class="hint" id="vehHint"></div>
         </div>
       </div>
 
+      <div id="requestSummary" class="summaryBox"></div>
+      <div id="scheduleInsights" class="insightBox"></div>
       <div id="typeFields"></div>
-
-      <div class="hint">If no end time is specified, the system automatically sets a 4-hour minimum duration.</div>
     </div>
 
     <div class="modalF">
-      <button id="btnRequestClose">Close</button>
-      <button class="ok" id="btnSubmitRequest">Submit Request</button>
-    </div>
-  </div>
-</div>
-
-<!-- Detail Modal -->
-<div class="modalBg" id="detailBg">
-  <div class="modal">
-    <div class="modalH">
-      <div style="font-weight:900">Schedule Details</div>
-      <div class="spacer"></div>
-      <span class="badge" id="detailStatus"></span>
-    </div>
-
-    <div class="modalB" id="detailContent"></div>
-
-    <div class="modalF">
-      <button id="btnDetailClose">Close</button>
+      <button id="btnClose">Close</button>
+      <button class="danger" id="btnCancelReq">Set CANCELLED</button>
+      <button class="primary" id="btnSave">Save</button>
+      <button class="ok" id="btnConfirm">Save + CONFIRM</button>
+      <button class="ok" id="btnDuplicate">Duplicate</button>
     </div>
   </div>
 </div>
 
 <script>
   const API_URL = "https://logistics.sjtc-kobempeynado.workers.dev/";
+  const PIN_KEY = "lps_v12_manager_pin";
 
   const $ = id => document.getElementById(id);
-  let offsetWeeks = 0;
+  let pin = localStorage.getItem(PIN_KEY) || "";
   let BOOT = null;
-  let items = [];
-  let isSubmittingRequest = false;
+  let requests = [];
+  let offsetWeeks = 0;
+  let currentRequest = null;
+  let isCreating = false;
+  let isSavingRequest = false;
+  let selectedInstallerState = [];
+  let selectedDayKey = null;
   let autoRefreshTimer = null;
+  let selectedGatePassIds = new Set();
 
   const pad2 = n => String(n).padStart(2,"0");
   const ymd = d => `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
+  const nice = d => d.toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric"});
 
   function startOfWeekMonday(date){
     const d = new Date(date.getFullYear(),date.getMonth(),date.getDate());
@@ -542,32 +745,55 @@
 
   const addDays = (d,n)=>{ const x=new Date(d); x.setDate(x.getDate()+n); return x; };
 
+  function toLocalInputValue(iso){
+    if(!iso) return "";
+    const d = new Date(iso);
+    const off = d.getTimezoneOffset();
+    const local = new Date(d.getTime() - off*60000);
+    return local.toISOString().slice(0,16);
+  }
+
+  function fromLocalInputValue(v){
+    if(!v) return "";
+    const d = new Date(v);
+    return d.toISOString();
+  }
+
+  function addHoursLocal(date, hours){
+    const x = new Date(date);
+    x.setHours(x.getHours() + hours);
+    return x;
+  }
+
+  function getStartEndISOFromForm(){
+    const startRaw = $("fStart").value;
+    const endRaw = $("fEnd").value;
+
+    const start = new Date(startRaw);
+    const end = endRaw ? new Date(endRaw) : addHoursLocal(start, 4);
+
+    return {
+      StartDT: start.toISOString(),
+      EndDT: end.toISOString(),
+      endLocalInput: toLocalInputValue(end.toISOString())
+    };
+  }
+
   function windowDates(){
     const anchor = startOfWeekMonday(new Date());
     const start = addDays(anchor, offsetWeeks*7);
     return Array.from({length:14}, (_,i)=>addDays(start,i));
   }
 
-  function nice(d){
-    return d.toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric"});
-  }
-
-  function escapeHtml(str){
-    return String(str ?? "").replace(/[&<>\"']/g, c=>({
-      "&":"&amp;",
-      "<":"&lt;",
-      ">":"&gt;",
-      "\"":"&quot;",
-      "'":"&#039;"
-    }[c]));
-  }
-
-  function escapeAttr(str){
-    return escapeHtml(String(str ?? "")).replace(/'/g, "&#39;");
+  function windowStartEndISO(){
+    const dates = windowDates();
+    const start = dates[0];
+    const end = addDays(dates[dates.length-1], 1);
+    return {startISO:start.toISOString(), endISO:end.toISOString(), start, end:addDays(end,-1)};
   }
 
   async function api(action, payload){
-    const res = await fetch(`${API_URL}?action=${encodeURIComponent(action)}`, {
+    const res = await fetch(`${API_URL}?action=${encodeURIComponent(action)}`,{
       method:"POST",
       headers:{ "Content-Type":"application/json" },
       body: JSON.stringify(payload || {})
@@ -577,14 +803,18 @@
     return j;
   }
 
-  function driverName(code){
-    const d = (BOOT.drivers||[]).find(x=>x.DriverCode===code);
-    return d ? d.DriverName : "";
+  function escapeHtml(str){
+    return String(str ?? "").replace(/[&<>"']/g, c=>({
+      "&":"&amp;",
+      "<":"&lt;",
+      ">":"&gt;",
+      "\"":"&quot;",
+      "'":"&#039;"
+    }[c]));
   }
 
-  function vehicleLabel(code){
-    const v = (BOOT.vehicles||[]).find(x=>x.VehicleCode===code);
-    return v ? v.VehicleLabel : "";
+  function escapeAttr(str){
+    return escapeHtml(str).replace(/"/g,"&quot;");
   }
 
   function displayType(type){
@@ -598,9 +828,9 @@
 
   function tripStatusPill(r){
     const st = tripStatusLabel(r);
-    if(st === "IN_TRANSIT") return `<span class="pill info">🚚 In Transit</span>`;
+    if(st === "IN_TRANSIT") return `<span class="pill warn">🚚 In Transit</span>`;
     if(st === "ARRIVED") return `<span class="pill ok">📍 Arrived</span>`;
-    return `<span class="pill">Ready</span>`;
+    return `<span class="pill info">Ready</span>`;
   }
 
   function tripTimesHTML(r){
@@ -610,193 +840,673 @@
     return bits.join(" • ") || "No trip log yet";
   }
 
-    function titleFor(r){
+  function codingDigitsForDate(dateObj){
+    const day = dateObj.getDay();
+    if(day === 1) return ["1","2"];
+    if(day === 2) return ["3","4"];
+    if(day === 3) return ["5","6"];
+    if(day === 4) return ["7","8"];
+    if(day === 5) return ["9","0"];
+    return [];
+  }
+
+  function getVehicleByCode(code){
+    return (BOOT && BOOT.vehicles ? BOOT.vehicles : []).find(v => v.VehicleCode === code) || null;
+  }
+
+  function getDriverByCode(code){
+    return (BOOT && BOOT.drivers ? BOOT.drivers : []).find(d => d.DriverCode === code) || null;
+  }
+
+  function plateNoFromVehicleCode(code){
+    const v = getVehicleByCode(code);
+    return String((v && (v.PlateNo || v.PlateNumber || "")) || "").trim();
+  }
+
+  function uniqueNonEmpty(arr){
+    return Array.from(new Set((arr || []).map(x => String(x || "").trim()).filter(Boolean)));
+  }
+
+  function requestAddressForGatePass(r){
+    const p = r.Payload || {};
+    return String(p.Address || p.Destination || "").trim();
+  }
+
+  function requestPersonnelForGatePass(r){
+    const p = r.Payload || {};
+    const installers = Array.isArray(p.Installers) ? p.Installers : [];
+    const fromNames = installers
+      .map(x => String((x && x.InstallerName) || "").trim())
+      .filter(Boolean);
+    return uniqueNonEmpty(fromNames);
+  }
+
+  function requestPurposeForGatePass(r){
+    return displayType(r.Type || "");
+  }
+
+  function toggleGatePassSelection(requestId, checked){
+    if(checked) selectedGatePassIds.add(String(requestId));
+    else selectedGatePassIds.delete(String(requestId));
+  }
+
+  function clearGatePassSelection(){
+    selectedGatePassIds.clear();
+    renderDispatchBoard();
+  }
+
+  function collectGatePassRequestsSelected(){
+    return requests.filter(r =>
+      selectedGatePassIds.has(String(r.RequestID)) &&
+      r.Status === "CONFIRMED"
+    );
+  }
+
+  function collectGatePassRequestsToday(){
+    const todayKey = ymd(new Date());
+    return requests.filter(r =>
+      r.Status === "CONFIRMED" &&
+      ymd(new Date(r.StartDT)) === todayKey
+    );
+  }
+
+  function groupGatePassRequests(list){
+    const groups = {};
+
+    list
+      .slice()
+      .sort((a,b)=> new Date(a.StartDT) - new Date(b.StartDT))
+      .forEach(r=>{
+        const dateKey = ymd(new Date(r.StartDT));
+        const driverCode = String(r.DriverCode || "").trim() || "UNASSIGNED";
+        const vehicleCode = String(r.VehicleCode || "").trim() || "";
+        const key = `${dateKey}||${driverCode}||${vehicleCode}`;
+
+        if(!groups[key]){
+          groups[key] = {
+            dateKey,
+            driverCode,
+            vehicleCode,
+            items: []
+          };
+        }
+        groups[key].items.push(r);
+      });
+
+    return Object.values(groups).map(g=>{
+      const driver = getDriverByCode(g.driverCode);
+      const vehicle = getVehicleByCode(g.vehicleCode);
+
+      const itineraries = uniqueNonEmpty(g.items.map(requestAddressForGatePass));
+      const personnel = uniqueNonEmpty(g.items.flatMap(requestPersonnelForGatePass));
+      const purposes = uniqueNonEmpty(g.items.map(requestPurposeForGatePass));
+      const requestedBy = uniqueNonEmpty(g.items.map(x => x.RequestedBy));
+
+      return {
+        dateKey: g.dateKey,
+        dateLabel: new Date(g.dateKey + "T00:00:00").toLocaleDateString(undefined, {
+          month:"short", day:"numeric", year:"numeric"
+        }),
+        vehicleLabel: String((vehicle && vehicle.VehicleLabel) || g.vehicleCode || "").trim(),
+        plateNo: plateNoFromVehicleCode(g.vehicleCode),
+        driverLabel: String((driver && driver.DriverName) || g.driverCode || "").trim(),
+        driverCode: g.driverCode,
+        vehicleCode: g.vehicleCode,
+        itineraries,
+        personnel,
+        purposeText: purposes.join(", "),
+        requestedByText: requestedBy.join(", "),
+        items: g.items
+      };
+    });
+  }
+
+  function gatePassSlipHTML(g){
+    const itineraryHtml = g.itineraries.length
+      ? `<ul class="gpList">${g.itineraries.map(x => `<li>${escapeHtml(x)}</li>`).join("")}</ul>`
+      : `<div class="gpLineFill">&nbsp;</div>`;
+
+    const personnelHtml = g.personnel.length
+      ? `<ul class="gpList">${g.personnel.map(x => `<li>${escapeHtml(x)}</li>`).join("")}</ul>`
+      : `<div class="gpLineFill">&nbsp;</div>`;
+
+    return `
+      <div class="gpSlip">
+        <div class="gpHead">
+          <div class="gpCompany">SJTC MANUFACTURING INC.</div>
+          <div class="gpTitle">GATE PASS</div>
+        </div>
+
+        <div class="gpBody">
+          <div class="gpTwoCol">
+            <div class="gpField inline">
+              <span class="gpLabel">Date of Travel:</span>
+              <span class="gpLine">${escapeHtml(g.dateLabel)}</span>
+            </div>
+            <div class="gpField inline">
+              <span class="gpLabel">Time of Dispatch:</span>
+              <span class="gpLine">&nbsp;</span>
+            </div>
+          </div>
+
+          <div class="gpTwoCol">
+            <div class="gpField inline">
+              <span class="gpLabel">Vehicle:</span>
+              <span class="gpLine">${escapeHtml(g.vehicleCode || "")}</span>
+            </div>
+            <div class="gpField inline">
+              <span class="gpLabel">Plate No.:</span>
+              <span class="gpLine">${escapeHtml(g.plateNo || "")}</span>
+            </div>
+          </div>
+
+          <div class="gpField inline">
+            <span class="gpLabel">Driver:</span>
+            <span class="gpLine">${escapeHtml(g.driverLabel || g.driverCode || "")}</span>
+          </div>
+
+          <div class="gpField block compact">
+            <div class="gpLabel">Itineraries:</div>
+            <div class="gpBox">${itineraryHtml}</div>
+          </div>
+
+          <div class="gpField block compact">
+            <div class="gpLabel">Personnel:</div>
+            <div class="gpBox">${personnelHtml}</div>
+          </div>
+
+          <div class="gpField inline">
+            <span class="gpLabel">Purpose:</span>
+            <span class="gpLine">${escapeHtml(g.purposeText || "")}</span>
+          </div>
+
+          <div class="gpField inline">
+            <span class="gpLabel">Remarks:</span>
+            <span class="gpLine">&nbsp;</span>
+          </div>
+
+          <div class="gpField inline">
+            <span class="gpLabel">Requested by:</span>
+            <span class="gpLine">${escapeHtml(g.requestedByText || "")}</span>
+          </div>
+
+          <div class="gpField block sign">
+            <div class="gpLabel">Approved by:</div>
+            <div class="gpSignLine"></div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function buildGatePassPrintHTML(groups){
+    const slips = groups.map(g => gatePassSlipHTML(g)).join("");
+
+    return `
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Gate Pass Print</title>
+  <style>
+    @page{
+      size: Letter portrait;
+      margin: 0.32in;
+    }
+
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family: Arial, Helvetica, sans-serif;
+      color:#111;
+      background:#fff;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    .sheet{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.14in;
+      align-items:start;
+    }
+
+    .gpSlip{
+      border:1.2px solid #444;
+      border-radius:10px;
+      padding:8px 10px;
+      min-height: 3.02in;
+      page-break-inside: avoid;
+      break-inside: avoid;
+      display:flex;
+      flex-direction:column;
+      background: linear-gradient(180deg, #fafafa 0%, #ffffff 100%);
+      box-shadow: 0 0 0 1px rgba(0,0,0,.04) inset;
+    }
+
+    .gpHead{
+      text-align:center;
+      margin-bottom:6px;
+      padding-bottom:4px;
+      border-bottom:1px solid #bbb;
+    }
+
+    .gpCompany,
+    .gpTitle,
+    .gpBody,
+    .gpLabel,
+    .gpLine,
+    .gpBox,
+    .gpList,
+    .gpList li,
+    .gpSignLine{
+      font-size:10.5px;
+      line-height:1.18;
+    }
+
+    .gpCompany,
+    .gpTitle{
+      font-weight:700;
+      letter-spacing:.2px;
+    }
+
+    .gpTitle{
+      margin-top:1px;
+    }
+
+    .gpBody{
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+      flex:1;
+    }
+
+    .gpTwoCol{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+    }
+
+    .gpField.inline{
+      display:flex;
+      align-items:flex-end;
+      gap:6px;
+      min-width:0;
+    }
+
+    .gpField.block{
+      display:block;
+    }
+
+    .gpLabel{
+      font-weight:700;
+      white-space:nowrap;
+      flex:0 0 auto;
+    }
+
+    .gpLine{
+      flex:1 1 auto;
+      min-width:0;
+      min-height:15px;
+      border-bottom:1px solid #555;
+      padding:0 2px 1px 2px;
+    }
+
+    .gpBox{
+      margin-top:1px;
+      min-height:22px;
+      border:1px solid #777;
+      border-radius:6px;
+      padding:3px 6px;
+      background:#fff;
+    }
+
+    .gpField.compact .gpBox{
+      min-height:30px;
+    }
+
+    .gpList{
+      margin:0;
+      padding-left:14px;
+    }
+
+    .gpList li{
+      margin:0 0 1px 0;
+    }
+
+    .gpLineFill{
+      min-height:14px;
+    }
+
+    .gpField.sign{
+      margin-top:auto;
+      padding-top:4px;
+    }
+
+    .gpSignLine{
+      margin-top:16px;
+      height:28px;
+      border-bottom:1px solid #555;
+    }
+  </style>
+</head>
+<body>
+  <div class="sheet">${slips}</div>
+  <script>
+    window.onload = function(){
+      window.print();
+    };
+  <\/script>
+</body>
+</html>
+    `;
+  }
+
+  function openGatePassPrint(groups){
+    if(!groups.length){
+      alert("No dispatches found for gate pass printing.");
+      return;
+    }
+
+    const html = buildGatePassPrintHTML(groups);
+    const w = window.open("", "_blank");
+    if(!w){
+      alert("Pop-up blocked. Please allow pop-ups for printing gate passes.");
+      return;
+    }
+    w.document.open();
+    w.document.write(html);
+    w.document.close();
+  }
+
+  function generateSelectedGatePasses(){
+    const picked = collectGatePassRequestsSelected();
+    if(!picked.length){
+      alert("Select at least one confirmed dispatch first.");
+      return;
+    }
+    const groups = groupGatePassRequests(picked);
+    openGatePassPrint(groups);
+  }
+
+  function printAllTodayGatePasses(){
+    const picked = collectGatePassRequestsToday();
+    if(!picked.length){
+      alert("No confirmed dispatches for today.");
+      return;
+    }
+    const groups = groupGatePassRequests(picked);
+    openGatePassPrint(groups);
+  }
+
+  function typePill(type){
+    return `<span class="pill info">${escapeHtml(displayType(type))}</span>`;
+  }
+
+  function pillForStatus(s){
+    if(s==="CONFIRMED") return `<span class="pill ok">✅</span>`;
+    if(s==="PENDING") return `<span class="pill warn">⏳</span>`;
+    return `<span class="pill bad">❌</span>`;
+  }
+
+  function isScheduled(r){
+    return (r.Status !== "CANCELLED") && !!(r.DriverCode && r.VehicleCode);
+  }
+
+  function pillForScheduled(r){
+    return isScheduled(r)
+      ? `<span class="pill info">📅</span>`
+      : `<span class="pill">📝</span>`;
+  }
+
+  function normalizeSearch(s){ return String(s||"").toLowerCase(); }
+
+  function matchesSearch(r,q){
+    if(!q) return true;
+    const p = r.Payload || {};
+    const hay = [
+      r.RequestID, r.Type, r.Status, r.DriverCode, r.VehicleCode, r.RequestedBy,
+      p.SONumber, p.ClientName, p.ContactNumber, p.Address, p.Items,
+      p.Destination, p.Purpose, p.RequiredVehicle, p.Notes
+    ].map(normalizeSearch).join(" | ");
+    return hay.includes(q);
+  }
+
+  function applyFilters(list){
+    const st = $("statusFilter").value;
+    const ty = $("typeFilter").value;
+    const dr = $("driverFilter").value;
+    const ve = $("vehicleFilter").value;
+    const sf = $("schedFilter").value;
+    const q = normalizeSearch($("q").value.trim());
+
+    return list.filter(r=>{
+      if(st!=="ALL" && r.Status!==st) return false;
+      if(ty!=="ALL" && r.Type!==ty) return false;
+      if(dr!=="ALL" && r.DriverCode!==dr) return false;
+      if(ve!=="ALL" && r.VehicleCode!==ve) return false;
+      if(sf==="SCHEDULED" && !isScheduled(r)) return false;
+      if(sf==="UNSCHEDULED" && isScheduled(r)) return false;
+      if(!matchesSearch(r,q)) return false;
+      return true;
+    });
+  }
+
+  function requestTitle(r){
     const p = r.Payload || {};
     if(r.Type==="Delivery") return `${p.SONumber || "SO ?"} • ${p.ClientName || ""}`.trim();
     if(r.Type==="Client Call" || r.Type==="Client Call") return `${p.ClientName || ""} • ${p.Destination || ""}`.trim();
-    return `${p.Purpose || "Service"} • ${p.Destination || ""}`.trim();
+    return `${p.Purpose || "Service"}${p.ClientName ? " • " + p.ClientName : ""}${p.Destination ? " • " + p.Destination : ""}`.trim();
   }
 
-  function subtitleFor(r){
+  function requestSubtitle(r){
     const p = r.Payload || {};
     if(r.Type==="Delivery") return `${p.Address || ""}`.trim();
     if(r.Type==="Client Call" || r.Type==="Client Call") return `${p.Destination || ""}`.trim();
-    return `${p.RequiredVehicle ? ("Vehicle: " + p.RequiredVehicle + " • ") : ""}${p.Destination || ""}`.trim();
+    return `${p.RequiredVehicle ? ("Vehicle: " + p.RequiredVehicle + " • ") : ""}${p.ClientName ? (p.ClientName + (p.Destination ? " • " : "")) : ""}${p.Destination || ""}`.trim();
   }
 
-  function openRequestModal(){
-    $("requestBg").style.display = "flex";
-    setSubmitBusy(false);
+  function shortText(v){
+    return String(v || "").trim();
   }
 
-  function closeRequestModal(){
-    if(isSubmittingRequest) return;
-    $("requestBg").style.display = "none";
-  }
-
-  function setSubmitBusy(busy){
-    $("btnSubmitRequest").disabled = busy;
-    $("btnRequestClose").disabled = busy;
-    $("btnSubmitRequest").textContent = busy ? "Submitting..." : "Submit Request";
-  }
-
-
-  function isAnyModalOpen(){
-    return ["requestBg","detailBg"].some(id => {
-      const el = $(id);
-      return el && el.style.display === "flex";
-    });
-  }
-
-  async function refreshSilently(reason){
-    if(isAnyModalOpen() || isSubmittingRequest) return;
-    try{
-      $("refreshBadge").textContent = reason === "timer" ? "Syncing..." : "Refreshing...";
-      BOOT = await api("bootstrapPublic", {});
-      const dates = windowDates();
-      const startISO = dates[0].toISOString();
-      const data = await api("publicSchedule", { startISO });
-      items = data.items || [];
-      renderCurrentTab();
-      $("refreshBadge").textContent = "Synced just now";
-    } catch(err){
-      $("refreshBadge").textContent = "Sync failed";
-      console.error("Silent refresh failed", err);
-    }
-  }
-
-  function startAutoRefresh(){
-    if(autoRefreshTimer) clearInterval(autoRefreshTimer);
-    autoRefreshTimer = setInterval(()=>{ refreshSilently("timer"); }, 60000);
-  }
-
-  function installerListHtml(payload){
-    const arr = Array.isArray(payload.Installers) ? payload.Installers : [];
-    if(!arr.length) return "";
-
-    const items = arr.map(inst=>{
-      if(inst && typeof inst === "object"){
-        const name = inst.InstallerName || inst.name || inst.Name || inst.label || inst.code || inst.InstallerCode || "";
-        const num = inst.ContactNumber || inst.Number || inst.phone || inst.Mobile || "";
-        return `<li>${escapeHtml(name || "—")}${num ? ` <span class="small">(${escapeHtml(num)})</span>` : ""}</li>`;
-      }
-      return `<li>${escapeHtml(String(inst))}</li>`;
-    }).join("");
-
-    return `
-      <div class="small" style="margin-top:8px"><b>Installers:</b></div>
-      <ul class="small" style="margin:6px 0 0 18px;padding:0;display:grid;gap:4px">${items}</ul>
-    `;
-  }
-
-  function compactMainLine(r){
+  function cardMainLine(r){
     const p = r.Payload || {};
-    if(r.Type === "Delivery") return [p.SONumber, p.ClientName, p.Address].filter(Boolean).map(escapeHtml).map(x=>`<b>${x}</b>`).join(" • ") || `<b>Delivery</b>`;
-    if(r.Type === "Client Call" || r.Type === "Client Call") return [p.ClientName, p.Destination].filter(Boolean).map(escapeHtml).map(x=>`<b>${x}</b>`).join(" • ") || `<b>Client Call</b>`;
-    return [p.ClientName, p.Destination, p.Purpose].filter(Boolean).map(escapeHtml).map(x=>`<b>${x}</b>`).join(" • ") || `<b>Service</b>`;
+    if(r.Type==="Delivery"){
+      return [p.SONumber, p.ClientName, p.Address].map(shortText).filter(Boolean).map(escapeHtml).map(x=>`<b>${x}</b>`).join(" • ") || `<b>${escapeHtml(displayType(r.Type))}</b>`;
+    }
+    if(r.Type==="Client Call" || r.Type==="Client Call"){
+      return [p.ClientName, p.Destination].map(shortText).filter(Boolean).map(escapeHtml).map(x=>`<b>${x}</b>`).join(" • ") || `<b>Client Call</b>`;
+    }
+    return [p.ClientName, p.Destination, p.Purpose].map(shortText).filter(Boolean).map(escapeHtml).map(x=>`<b>${x}</b>`).join(" • ") || `<b>Service</b>`;
   }
 
-  function openDetailModal(item){
-    const p = item.Payload || {};
-    const st = new Date(item.StartDT);
-    const en = new Date(item.EndDT);
-    const dName = driverName(item.DriverCode);
-    const vLabel = vehicleLabel(item.VehicleCode);
-    const installerHtml = installerListHtml(p);
+  function formatTimeRange(startISO, endISO){
+    const st = new Date(startISO);
+    const en = new Date(endISO);
+    return `${st.toLocaleTimeString(undefined,{hour:"2-digit",minute:"2-digit"})}–${en.toLocaleTimeString(undefined,{hour:"2-digit",minute:"2-digit"})}`;
+  }
 
-    $("detailStatus").textContent = item.Status || "";
-    $("detailContent").innerHTML = `
-      <div class="detailBox">
-        <div style="font-weight:900;font-size:16px;margin-bottom:6px">${escapeHtml(titleFor(item))}</div>
-        <div class="small">${escapeHtml(subtitleFor(item))}</div>
-      </div>
+  function installerTextFromPayload(payload){
+    return installerLabelFromPayload(payload) || "—";
+  }
 
-      <div class="detailGrid">
-        <div class="detailBox">
-          <div class="small"><b>Request ID:</b> ${escapeHtml(item.RequestID || "—")}</div>
-          <div class="small"><b>Type:</b> ${escapeHtml(displayType(item.Type || "—"))}</div>
-          <div class="small"><b>Status:</b> ${escapeHtml(item.Status || "—")}</div>
-        </div>
+  function buildSummaryGridHTML(r, payload){
+    const p = payload || r.Payload || {};
+    const items = [];
+    if(r.Type === "Delivery") items.push(["SO#", p.SONumber || "—"]);
+    if(p.ClientName || r.Type !== "Client Call" && r.Type !== "Client Call") items.push(["Client Name", p.ClientName || "—"]);
+    items.push(["Address", p.Address || p.Destination || "—"]);
+    if(p.ContactNumber || r.Type === "Delivery") items.push(["Contact Number", p.ContactNumber || "—"]);
+    items.push(["Vehicle", r.VehicleCode || "—"]);
+    items.push(["Driver", r.DriverCode || "—"]);
+    items.push(["Installers", installerTextFromPayload(p)]);
+    items.push(["Area", p.AreaClass || "—"]);
+    items.push(["Trip", tripStatusLabel(r)]);
+    items.push(["Notes", p.Notes || "—"]);
+    return `<div class="small" style="font-weight:900;margin-bottom:8px">Schedule Summary</div><div class="summaryGrid">` + items.map(([k,v])=>`<div class="small"><b>${escapeHtml(k)}:</b> ${escapeHtml(v)}</div>`).join("") + `</div>`;
+  }
 
-        <div class="detailBox">
-          <div class="small"><b>Date:</b> ${escapeHtml(st.toLocaleDateString())}</div>
-          <div class="small"><b>Time:</b> ${escapeHtml(st.toLocaleTimeString(undefined,{hour:"2-digit",minute:"2-digit"}))}–${escapeHtml(en.toLocaleTimeString(undefined,{hour:"2-digit",minute:"2-digit"}))}</div>
-          <div class="small"><b>Driver:</b> ${escapeHtml(item.DriverCode || "—")}${dName ? " — " + escapeHtml(dName) : ""}</div>
-          <div class="small"><b>Vehicle:</b> ${escapeHtml(item.VehicleCode || "—")}${vLabel ? " — " + escapeHtml(vLabel) : ""}</div>
-          <div class="small"><b>Trip:</b> ${escapeHtml(tripStatusLabel(item))}</div>
-          <div class="small"><b>Trip Log:</b> ${escapeHtml(tripTimesHTML(item))}</div>
-        </div>
-      </div>
+  function currentFormPayload(){
+    const type = $("fType").value;
+    return gatherPayload(type);
+  }
 
-      ${
-        item.Type === "Delivery" ? `
-          <div class="detailBox">
-            <div class="small"><b>SO#:</b> ${escapeHtml(p.SONumber || "—")}</div>
-            <div class="small"><b>Client Name:</b> ${escapeHtml(p.ClientName || "—")}</div>
-            <div class="small"><b>Contact Number:</b> ${escapeHtml(p.ContactNumber || "—")}</div>
-            <div class="small"><b>Delivery Address:</b> ${escapeHtml(p.Address || "—")}</div>
-            <div class="small"><b>Area:</b> ${escapeHtml(p.AreaClass || "—")}</div>
-            <div class="small"><b>Items to Deliver:</b> ${escapeHtml(p.Items || "—")}</div>
-            ${installerHtml}
-            ${p.Notes ? `<div class="small" style="margin-top:8px"><b>Special Instructions:</b> ${escapeHtml(p.Notes)}</div>` : ""}
-          </div>
-        ` : (item.Type === "Client Call" || item.Type === "Client Call") ? `
-          <div class="detailBox">
-            <div class="small"><b>Name:</b> ${escapeHtml(item.RequestedBy || "—")}</div>
-            <div class="small"><b>Client Name:</b> ${escapeHtml(p.ClientName || "—")}</div>
-            <div class="small"><b>Destination:</b> ${escapeHtml(p.Destination || "—")}</div>
-            <div class="small"><b>Area:</b> ${escapeHtml(p.AreaClass || "—")}</div>
-            ${installerHtml}
-            ${p.Notes ? `<div class="small" style="margin-top:8px"><b>Special Instructions:</b> ${escapeHtml(p.Notes)}</div>` : ""}
-          </div>
-        ` : `
-          <div class="detailBox">
-            <div class="small"><b>Name:</b> ${escapeHtml(item.RequestedBy || "—")}</div>
-            <div class="small"><b>Client Name:</b> ${escapeHtml(p.ClientName || "—")}</div>
-            <div class="small"><b>Destination:</b> ${escapeHtml(p.Destination || "—")}</div>
-            <div class="small"><b>Area:</b> ${escapeHtml(p.AreaClass || "—")}</div>
-            <div class="small"><b>Purpose:</b> ${escapeHtml(p.Purpose || "—")}</div>
-            <div class="small"><b>Required Vehicle:</b> ${escapeHtml(p.RequiredVehicle || "—")}</div>
-            ${installerHtml}
-            ${p.Notes ? `<div class="small" style="margin-top:8px"><b>Special Instructions:</b> ${escapeHtml(p.Notes)}</div>` : ""}
-          </div>
-        `
+  function renderRequestSummary(){
+    const box = $("requestSummary");
+    if(!box) return;
+    const base = currentRequest || { Type: $("fType").value, Payload: {}, DriverCode:"", VehicleCode:"" };
+    const r = {
+      Type: $("fType").value,
+      Payload: currentFormPayload(),
+      DriverCode: $("fDriver").value || base.DriverCode || "",
+      VehicleCode: $("fVehicle").value || base.VehicleCode || ""
+    };
+    box.innerHTML = buildSummaryGridHTML(r, r.Payload);
+  }
+
+  function intervalOverlap(aStart, aEnd, bStart, bEnd){
+    return aStart < bEnd && aEnd > bStart;
+  }
+
+  function activeDrivers(){
+    return (BOOT && BOOT.drivers ? BOOT.drivers : []).filter(x=>String(x.Active||"Y").toUpperCase()==="Y");
+  }
+
+  function activeVehicles(){
+    return (BOOT && BOOT.vehicles ? BOOT.vehicles : []).filter(x=>String(x.Active||"Y").toUpperCase()==="Y");
+  }
+
+  function computeModalConflicts(){
+    const startRaw = $("fStart").value;
+    const endRaw = $("fEnd").value;
+    if(!startRaw || !endRaw) return null;
+    const start = new Date(startRaw);
+    const end = new Date(endRaw);
+    if(!(start < end)) return { invalid:true };
+
+    const driver = $("fDriver").value;
+    const vehicle = $("fVehicle").value;
+    const installers = selectedInstallerCodes();
+    const excludeId = currentRequest ? currentRequest.RequestID : "";
+    const dateKey = startRaw.slice(0,10);
+
+    const overlaps = requests.filter(r=>{
+      if(!r || r.RequestID===excludeId || r.Status==="CANCELLED") return false;
+      return intervalOverlap(start, end, new Date(r.StartDT), new Date(r.EndDT));
+    });
+
+    const driverConflicts = overlaps.filter(r=>driver && r.DriverCode===driver);
+    const vehicleConflicts = overlaps.filter(r=>vehicle && r.VehicleCode===vehicle);
+    const installerConflicts = overlaps.filter(r=>{
+      const codes = (r.InstallerCodes || ((r.Payload && r.Payload.InstallerCodes) || [])).map(String);
+      return installers.some(code=>codes.includes(String(code)));
+    });
+
+    const blockedVehicleCodes = activeVehicles().filter(v=>String(v.UnavailableDates||"").split(",").map(x=>x.trim()).includes(dateKey)).map(v=>v.VehicleCode);
+    const availableDrivers = activeDrivers().filter(d=>!overlaps.some(r=>r.DriverCode===d.DriverCode));
+    const availableVehicles = activeVehicles().filter(v=>!overlaps.some(r=>r.VehicleCode===v.VehicleCode) && !blockedVehicleCodes.includes(v.VehicleCode));
+    const availableInstallers = activeInstallers().filter(i=>!overlaps.some(r=>{
+      const codes = (r.InstallerCodes || ((r.Payload && r.Payload.InstallerCodes) || [])).map(String);
+      return codes.includes(String(i.InstallerCode));
+    }));
+
+    return { invalid:false, start, end, driverConflicts, vehicleConflicts, installerConflicts, availableDrivers, availableVehicles, availableInstallers, blockedVehicleCodes };
+  }
+
+  function conflictListHTML(title, list, mapper){
+    if(!list.length) return "";
+    return `<div class="small" style="margin-top:8px"><b>${escapeHtml(title)}:</b></div><ul class="insightList">` + list.map(mapper).join("") + `</ul>`;
+  }
+
+  function renderScheduleInsights(){
+    const box = $("scheduleInsights");
+    if(!box) return;
+    const info = computeModalConflicts();
+    if(!info){
+      box.innerHTML = `<div class="small"><b>Availability</b></div><div class="hint" style="margin-top:6px">Choose start and end time to preview conflicts and available drivers, vehicles, and installers.</div>`;
+      return;
+    }
+    if(info.invalid){
+      box.innerHTML = `<div class="small"><b>Availability</b></div><div class="small" style="margin-top:6px;color:#ffd6d6">End time must be later than start time.</div>`;
+      return;
+    }
+    const warnings = [];
+    if(info.driverConflicts.length) warnings.push(conflictListHTML("Driver conflict", info.driverConflicts, r=>`<li>${escapeHtml(r.RequestID)} • ${escapeHtml(formatTimeRange(r.StartDT,r.EndDT))} • ${escapeHtml(cardMainLine(r).replace(/<[^>]+>/g,''))}</li>`));
+    if(info.vehicleConflicts.length) warnings.push(conflictListHTML("Vehicle conflict", info.vehicleConflicts, r=>`<li>${escapeHtml(r.RequestID)} • ${escapeHtml(formatTimeRange(r.StartDT,r.EndDT))} • ${escapeHtml(cardMainLine(r).replace(/<[^>]+>/g,''))}</li>`));
+    if(info.installerConflicts.length) warnings.push(conflictListHTML("Installer conflict", info.installerConflicts, r=>`<li>${escapeHtml(r.RequestID)} • ${escapeHtml(formatTimeRange(r.StartDT,r.EndDT))} • ${escapeHtml(installerTextFromPayload(r.Payload))}</li>`));
+    if(info.blockedVehicleCodes.length) warnings.push(`<div class="small" style="margin-top:8px"><b>Date-blocked vehicles:</b> ${escapeHtml(info.blockedVehicleCodes.join(", "))}</div>`);
+    const payload = currentFormPayload();
+    if ((payload.AreaClass || "") === "NCR" && vehicle) {
+      const vv = getVehicleByCode(vehicle);
+      const codedDigits = codingDigitsForDate(start);
+      const plateEnding = String((vv && vv.PlateEnding) || "").trim();
+      if (codedDigits.length && plateEnding && codedDigits.includes(plateEnding)) {
+        warnings.push(`<div class="small" style="margin-top:8px"><b>Coding warning:</b> ${escapeHtml(vehicle)} is restricted in NCR on this day (plate ending ${escapeHtml(plateEnding)}).</div>`);
       }
-    `;
+    }
 
-    $("detailBg").style.display = "flex";
+    box.innerHTML = `<div class="small" style="font-weight:900">Availability & Conflict Check</div>` +
+      (warnings.length ? warnings.join("") : `<div class="small" style="margin-top:6px;color:#d6ffe9">No conflicts for the current selection.</div>`) +
+      `<div class="small" style="margin-top:10px"><b>Available Drivers:</b> ${escapeHtml(info.availableDrivers.map(x=>x.DriverCode).join(", ") || "None")}</div>` +
+      `<div class="small" style="margin-top:4px"><b>Available Vehicles:</b> ${escapeHtml(info.availableVehicles.map(x=>x.VehicleCode).join(", ") || "None")}</div>` +
+      `<div class="small" style="margin-top:4px"><b>Available Installers:</b> ${escapeHtml(info.availableInstallers.map(x=>x.InstallerName || x.InstallerCode).join(", ") || "None")}</div>`;
   }
 
-  function closeDetailModal(){
-    $("detailBg").style.display = "none";
+  function attachDynamicFieldListeners(){
+    ["pSO","pClient","pContact","pAddr","pDestination","pPurpose","pRequiredVehicle","pNotes","pItems","pAreaClass"].forEach(id=>{
+      const el = $(id);
+      if(!el) return;
+      el.oninput = ()=> renderRequestSummary();
+    });
+    renderRequestSummary();
+    renderScheduleInsights();
+  }
+
+  function cardHTML(r){
+    return `
+      <div class="card click" data-open="${escapeAttr(r.RequestID)}">
+        <div class="compactMain">${cardMainLine(r)}</div>
+        <div class="line" style="gap:6px;flex-wrap:wrap">
+          ${typePill(r.Type)}
+          ${pillForScheduled(r)}
+          ${pillForStatus(r.Status)}
+          ${tripStatusPill(r)}
+        </div>
+        <div class="compactMeta">
+          <span>🕒 ${escapeHtml(formatTimeRange(r.StartDT,r.EndDT))}</span>
+          <span>${escapeHtml(tripTimesHTML(r))}</span>
+          <span>👤 ${escapeHtml(r.DriverCode||"—")}</span>
+          <span>🚚 ${escapeHtml(r.VehicleCode||"—")}</span>
+        </div>
+      </div>
+    `;
   }
 
   function renderCalendar(){
-    const cal = $("cal");
+    const wrap = $("viewCalendar");
     const dates = windowDates();
-    const start = dates[0];
-    const end = dates[dates.length-1];
-    $("range").textContent = `${nice(start)} → ${nice(end)}`;
-
     const byDay = {};
-    dates.forEach(d=> byDay[ymd(d)] = []);
+    for(const d of dates) byDay[ymd(d)] = [];
 
-    items.forEach(r=>{
+    const filtered = applyFilters(requests);
+    for(const r of filtered){
       const dt = new Date(r.StartDT);
-      const k = ymd(dt);
-      if(byDay[k]) byDay[k].push(r);
-    });
+      const key = ymd(dt);
+      if(byDay[key]) byDay[key].push(r);
+    }
 
-    cal.innerHTML = `<div class="grid" id="g"></div>`;
-    const g = $("g");
+    wrap.innerHTML = `<div class="grid" id="calGrid"></div>`;
+    const g = $("calGrid");
     const todayKey = ymd(new Date());
 
     for(const d of dates){
       const key = ymd(d);
-      const list = (byDay[key]||[]).slice().sort((a,b)=> new Date(a.StartDT) - new Date(b.StartDT));
+      const items = (byDay[key]||[]).slice().sort((a,b)=> new Date(a.StartDT)-new Date(b.StartDT));
 
       const day = document.createElement("div");
       day.className = key===todayKey ? "day today" : "day";
+      day.dataset.day = key;
       day.innerHTML = `
         <div class="dayHead">
           <div class="h">${d.toLocaleDateString(undefined,{weekday:"long"})}${key===todayKey ? " • Today" : ""}</div>
@@ -806,85 +1516,272 @@
       `;
       const body = day.querySelector(".dayBody");
 
-      if(!list.length){
-        body.innerHTML = `<div class="small">No scheduled items.</div>`;
+      if(!items.length){
+        body.innerHTML = `<div class="hint">No requests.</div>`;
       } else {
-        for(const r of list){
-          const st = new Date(r.StartDT);
-          const en = new Date(r.EndDT);
-          const p = r.Payload || {};
-          const notes = p.Notes || "";
-
-          const card = document.createElement("div");
-          card.className = "card";
-          card.innerHTML = `
-            <div class="compactMain">${compactMainLine(r)}</div>
-            <div class="line" style="gap:6px;flex-wrap:wrap">
-              <span class="pill info">${escapeHtml(displayType(r.Type))}</span>
-              <span class="pill info">${r.DriverCode || r.VehicleCode ? "📅" : "📝"}</span>
-              <span class="pill ${r.Status==="CANCELLED" ? "bad" : "ok"}">${r.Status==="CONFIRMED" ? "✅" : (r.Status==="PENDING" ? "⏳" : "❌")}</span>
-              ${tripStatusPill(r)}
-            </div>
-            <div class="compactMeta">
-              <span>🕒 ${escapeHtml(st.toLocaleTimeString(undefined,{hour:"2-digit",minute:"2-digit"}))}–${escapeHtml(en.toLocaleTimeString(undefined,{hour:"2-digit",minute:"2-digit"}))}</span>
-              <span>${escapeHtml(tripTimesHTML(r))}</span>
-              <span>👤 ${escapeHtml(r.DriverCode || "—")}</span>
-              <span>🚚 ${escapeHtml(r.VehicleCode || "—")}</span>
-            </div>
-          `;
-
-          if(r.Status === "CONFIRMED"){
-            card.addEventListener("click", ()=> openDetailModal(r));
-          }
-
-          body.appendChild(card);
-        }
+        items.forEach(r=> body.insertAdjacentHTML("beforeend", cardHTML(r)));
       }
 
       g.appendChild(day);
     }
+
+    wrap.querySelectorAll("[data-open]").forEach(el=>{
+      el.addEventListener("click", ()=> openModal(el.dataset.open));
+    });
+    wrap.querySelectorAll("[data-day]").forEach(el=>{
+      el.addEventListener("click", ()=> setSelectedDay(el.dataset.day));
+    });
+    highlightSelectedDays();
+  }
+
+  function tableHTML(list){
+    if(!list.length) return `<div class="hint">No records.</div>`;
+    const rows = list.map(r=>{
+      const st = new Date(r.StartDT);
+      return `
+        <tr class="click" data-open="${escapeAttr(r.RequestID)}">
+          <td><b>${escapeHtml(r.RequestID)}</b><div class="small">${pillForScheduled(r)} ${pillForStatus(r.Status)}</div></td>
+          <td>${escapeHtml(displayType(r.Type))}</td>
+          <td>${escapeHtml(requestTitle(r))}</td>
+          <td>${st.toLocaleString()}</td>
+          <td>${escapeHtml(r.DriverCode||"")}</td>
+          <td>${escapeHtml(r.VehicleCode||"")}</td>
+        </tr>
+      `;
+    }).join("");
+
+    return `
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Type</th>
+            <th>Title</th>
+            <th>Start</th>
+            <th>Driver</th>
+            <th>Vehicle</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    `;
   }
 
 
-  function renderDispatchBoard(){
-    const wrap = $("dispatchView");
-    const dates = windowDates();
-    const todayKey = ymd(new Date());
-    const confirmed = items.filter(r=>r.Status === "CONFIRMED");
+  function selectedDayDateObj(){
+    return selectedDayKey ? new Date(selectedDayKey + "T00:00:00") : new Date();
+  }
 
-    const byDay = {};
-    dates.forEach(d=> byDay[ymd(d)] = []);
-    confirmed.forEach(r=>{
-      const k = ymd(new Date(r.StartDT));
-      if(byDay[k]) byDay[k].push(r);
+  function setSelectedDay(key){
+    selectedDayKey = key;
+    renderSelectedDayPanel();
+    highlightSelectedDays();
+  }
+
+  function highlightSelectedDays(){
+    document.querySelectorAll("[data-day]").forEach(el=>{
+      el.classList.toggle("selected", el.dataset.day === selectedDayKey);
     });
+  }
 
+  function toggleSection(sectionId, chevronId){
+    const el = $(sectionId);
+    el.classList.toggle("collapsed");
+    $(chevronId).textContent = el.classList.contains("collapsed") ? "Show" : "Hide";
+  }
+
+  function renderSideInbox(){
+    const pending = requests.filter(r=>r.Status==="PENDING").sort((a,b)=> new Date(a.StartDT)-new Date(b.StartDT));
+    $("sidePendingBadge").textContent = `${pending.length} pending`;
+    const wrap = $("sideInboxBody");
+    if(!pending.length){
+      wrap.innerHTML = `<div class="hint">No pending requests.</div>`;
+      return;
+    }
+    wrap.innerHTML = pending.map(r=>`
+      <div class="resourceItem click" data-open="${escapeAttr(r.RequestID)}">
+        <div style="font-weight:800">${escapeHtml(r.RequestID)}</div>
+        <div class="mutedLine">${escapeHtml(displayType(r.Type))} • ${escapeHtml(requestTitle(r))}</div>
+        <div class="mutedLine">${escapeHtml(new Date(r.StartDT).toLocaleString())}</div>
+      </div>
+    `).join("");
+    wrap.querySelectorAll("[data-open]").forEach(el=> el.addEventListener("click", ()=> openModal(el.dataset.open)));
+  }
+
+  function listForDay(key, list){
+    return list.filter(r=> ymd(new Date(r.StartDT)) === key && r.Status !== "CANCELLED");
+  }
+
+  function resourceAvailableOnDay(resources, dayItems, codeKey){
+    return resources.filter(x => !dayItems.some(r => String(r[codeKey]||"") === String(x[codeKey]||"")));
+  }
+
+  function renderSelectedDayPanel(){
+    const key = selectedDayKey || ymd(new Date());
+    const dateObj = new Date(key + "T00:00:00");
+    const dayItems = listForDay(key, requests).filter(r=>r.Status==="CONFIRMED");
+    const pendingDay = listForDay(key, requests).filter(r=>r.Status==="PENDING");
+    const driversAvail = resourceAvailableOnDay(activeDrivers(), dayItems, "DriverCode");
+    const vehiclesAvail = resourceAvailableOnDay(activeVehicles(), dayItems, "VehicleCode");
+    const installersAvail = activeInstallers().filter(inst => !dayItems.some(r => {
+      const codes = (r.InstallerCodes || ((r.Payload && r.Payload.InstallerCodes) || [])).map(String);
+      return codes.includes(String(inst.InstallerCode));
+    }));
+
+    const codedDigits = codingDigitsForDate(dateObj);
+    const vehicleWarnings = vehiclesAvail.filter(v=> codedDigits.includes(String(v.PlateEnding||"").trim()));
+
+    $("sideDayBody").innerHTML = `
+      <div class="small"><b>Date:</b> ${escapeHtml(dateObj.toLocaleDateString(undefined,{weekday:"long", month:"short", day:"numeric", year:"numeric"}))}</div>
+      <div class="small" style="margin-top:4px"><b>Confirmed trips:</b> ${dayItems.length}</div>
+      <div class="small" style="margin-top:4px"><b>Pending requests:</b> ${pendingDay.length}</div>
+
+      <div class="small" style="font-weight:900;margin-top:12px">Available Drivers</div>
+      <div class="resourceList">
+        ${driversAvail.length ? driversAvail.map(d=>`<div class="resourceItem">${escapeHtml(d.DriverCode)} — ${escapeHtml(d.DriverName||"")}</div>`).join("") : `<div class="hint">No drivers available.</div>`}
+      </div>
+
+      <div class="small" style="font-weight:900;margin-top:12px">Available Vehicles</div>
+      <div class="resourceList">
+        ${vehiclesAvail.length ? vehiclesAvail.map(v=>`<div class="resourceItem ${vehicleWarnings.includes(v) ? "warn" : ""}">${escapeHtml(v.VehicleCode)} — ${escapeHtml(v.VehicleLabel||"")}${vehicleWarnings.includes(v) ? ` <span class="mutedLine">(coding-restricted in NCR)</span>` : ""}</div>`).join("") : `<div class="hint">No vehicles available.</div>`}
+      </div>
+
+      <div class="small" style="font-weight:900;margin-top:12px">Available Installers</div>
+      <div class="resourceList">
+        ${installersAvail.length ? installersAvail.map(i=>`<div class="resourceItem">${escapeHtml(i.InstallerCode)} — ${escapeHtml(i.InstallerName||"")}</div>`).join("") : `<div class="hint">No installers available.</div>`}
+      </div>
+
+      ${vehicleWarnings.length ? `<div class="small" style="font-weight:900;margin-top:12px">Coding Warning</div><div class="resourceList">${vehicleWarnings.map(v=>`<div class="resourceItem warn">${escapeHtml(v.VehicleCode)} ends in ${escapeHtml(v.PlateEnding||"?")} and may be coding-restricted for NCR trips on this day.</div>`).join("")}</div>` : ``}
+    `;
+  }
+
+  function isAnyModalOpen(){
+    return ["modalBg","tripBg","pinBg"].some(id => {
+      const el = $(id);
+      return el && el.style.display === "flex";
+    });
+  }
+
+  async function refreshSilently(reason){
+    if(!pin || isAnyModalOpen() || isSavingRequest) return;
+    try{
+      $("refreshBadge").textContent = reason === "timer" ? "Syncing..." : "Refreshing...";
+      const w = windowStartEndISO();
+      const data = await api("managerListRequests", { pin, startISO: w.startISO });
+      requests = data.items || [];
+      renderAll();
+      $("refreshBadge").textContent = "Synced just now";
+    }catch(err){
+      $("refreshBadge").textContent = "Sync failed";
+      console.error("Silent refresh failed", err);
+    }
+  }
+
+  function startAutoRefresh(){
+    if(autoRefreshTimer) clearInterval(autoRefreshTimer);
+    autoRefreshTimer = setInterval(()=>{ refreshSilently("timer"); }, 30000);
+  }
+
+  function renderInbox(){
+    const wrap = $("viewInbox");
+    const pending = requests.filter(r=>r.Status==="PENDING");
+    wrap.innerHTML = `
+      <div style="font-weight:900;margin-bottom:10px">Pending Requests</div>
+      ${tableHTML(pending)}
+    `;
+    wrap.querySelectorAll("[data-open]").forEach(el=>{
+      el.addEventListener("click", ()=> openModal(el.dataset.open));
+    });
+    wrap.querySelectorAll("[data-day]").forEach(el=>{
+      el.addEventListener("click", ()=> setSelectedDay(el.dataset.day));
+    });
+    highlightSelectedDays();
+  }
+
+  function renderAllRequests(){
+    const wrap = $("viewAll");
+    const list = applyFilters(requests).slice().sort((a,b)=> new Date(b.CreatedAt||0)-new Date(a.CreatedAt||0));
+    wrap.innerHTML = `
+      <div style="font-weight:900;margin-bottom:10px">All Requests (current window)</div>
+      ${tableHTML(list)}
+    `;
+    wrap.querySelectorAll("[data-open]").forEach(el=>{
+      el.addEventListener("click", ()=> openModal(el.dataset.open));
+    });
+    wrap.querySelectorAll("[data-day]").forEach(el=>{
+      el.addEventListener("click", ()=> setSelectedDay(el.dataset.day));
+    });
+    highlightSelectedDays();
+  }
+
+  function renderDispatchBoard(){
+    const wrap = $("viewDispatch");
+    const dates = windowDates();
+    const filtered = applyFilters(requests).filter(r=>r.Status==="CONFIRMED");
+    const todayKey = ymd(new Date());
     const chunks = [];
-    for(const d of dates){
-      const key = ymd(d);
-      const dayItems = (byDay[key] || []).slice().sort((a,b)=>new Date(a.StartDT)-new Date(b.StartDT));
-      const groups = {};
-      dayItems.forEach(r=>{
-        const gkey = `${r.DriverCode || "—"}__${r.VehicleCode || "—"}`;
-        if(!groups[gkey]) groups[gkey] = {driver:r.DriverCode || "—", vehicle:r.VehicleCode || "—", items:[]};
-        groups[gkey].items.push(r);
-      });
 
-      const groupHtml = Object.values(groups).map(g=>`
-        <div class="dispatchGroup">
-          <div class="dispatchHead">
-            <div><b>${escapeHtml(g.driver)}</b> • ${escapeHtml(g.vehicle)}</div>
-            <div class="small">${g.items.length} trip${g.items.length>1?"s":""}</div>
+    chunks.push(`
+      <div class="summaryBox" style="margin-bottom:12px">
+        <div class="line" style="justify-content:space-between;gap:10px;flex-wrap:wrap">
+          <div>
+            <div style="font-weight:900">Gate Pass Printing</div>
+            <div class="small">Generate printable gate passes grouped by Driver + Date + Vehicle.</div>
           </div>
-          <div class="dispatchItems">
-            ${g.items.map(r=>`<div class="dispatchItem click" data-open="${escapeAttr(r.RequestID)}"><div class="compactMain">${compactMainLine(r)}</div><div class="small" style="margin-top:4px">🕒 ${escapeHtml(new Date(r.StartDT).toLocaleTimeString(undefined,{hour:"2-digit",minute:"2-digit"}))}–${escapeHtml(new Date(r.EndDT).toLocaleTimeString(undefined,{hour:"2-digit",minute:"2-digit"}))}</div><div class="small" style="margin-top:4px">${tripStatusLabel(r)} • ${escapeHtml(tripTimesHTML(r))}</div></div>`).join("")}
+          <div class="line" style="gap:8px;flex-wrap:wrap">
+            <span class="badge">${selectedGatePassIds.size} selected</span>
+            <button class="primary" id="btnGenerateGatePass">Generate Gate Pass</button>
+            <button class="ok" id="btnPrintTodayGatePass">Print All for Today</button>
+            <button id="btnClearGatePassSelection">Clear Selection</button>
           </div>
         </div>
-      `).join("") || `<div class="small">No confirmed dispatches.</div>`;
+      </div>
+    `);
+
+    for(const d of dates){
+      const key = ymd(d);
+      const list = filtered
+        .filter(r=>ymd(new Date(r.StartDT))===key)
+        .sort((a,b)=>new Date(a.StartDT)-new Date(b.StartDT));
+
+      const groups = {};
+      list.forEach(r=>{
+        const gk = `${r.DriverCode||"Unassigned"}|${r.VehicleCode||"Unassigned"}`;
+        (groups[gk] ||= []).push(r);
+      });
+
+      const groupHtml = Object.entries(groups).map(([gk,items])=>{
+        const [driver, vehicle] = gk.split("|");
+        return `<div class="dispatchGroup">
+          <div class="dispatchHead">
+            <div style="font-weight:900">${escapeHtml(driver)} • ${escapeHtml(vehicle)}</div>
+            <div class="small">${items.length} trip${items.length>1?"s":""}</div>
+          </div>
+          <div class="dispatchItems">
+            ${items.map(r=>`
+              <div class="dispatchItem click" data-trip="${escapeAttr(r.RequestID)}">
+                <div class="line" style="justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:nowrap">
+                  <label class="line" style="gap:6px;align-items:center;cursor:pointer;flex:0 0 auto" onclick="event.stopPropagation()">
+                    <input
+                      type="checkbox"
+                      data-gp-check="${escapeAttr(r.RequestID)}"
+                      ${selectedGatePassIds.has(String(r.RequestID)) ? "checked" : ""}
+                    />
+                    <span class="small">Gate Pass</span>
+                  </label>
+                  <div class="small"><b>${escapeHtml(formatTimeRange(r.StartDT,r.EndDT))}</b></div>
+                </div>
+                <div class="compactMain">${cardMainLine(r)}</div>
+                <div class="small" style="margin-top:4px">${tripStatusLabel(r)}${tripTimesHTML(r) ? " • " + escapeHtml(tripTimesHTML(r)) : ""}</div>
+              </div>
+            `).join("")}
+          </div>
+        </div>`;
+      }).join("") || `<div class="hint">No confirmed dispatches.</div>`;
 
       chunks.push(`
         <div class="dispatchDay">
-          <div class="day ${key===todayKey ? "today" : ""}" style="min-height:auto">
+          <div class="day ${key===todayKey?"today":""}" data-day="${key}" style="min-height:auto">
             <div class="dayHead">
               <div class="h">${d.toLocaleDateString(undefined,{weekday:"long"})}${key===todayKey ? " • Today" : ""}</div>
               <div class="s">${d.toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"})}</div>
@@ -896,285 +1793,793 @@
     }
 
     wrap.innerHTML = chunks.join("");
-    wrap.querySelectorAll("[data-open]").forEach(el=>{
-      el.addEventListener("click", ()=>{
-        const r = items.find(x=>x.RequestID === el.dataset.open);
-        if(r) openDetailModal(r);
+
+    const btnGenerate = $("btnGenerateGatePass");
+    if(btnGenerate) btnGenerate.addEventListener("click", generateSelectedGatePasses);
+
+    const btnToday = $("btnPrintTodayGatePass");
+    if(btnToday) btnToday.addEventListener("click", printAllTodayGatePasses);
+
+    const btnClear = $("btnClearGatePassSelection");
+    if(btnClear) btnClear.addEventListener("click", clearGatePassSelection);
+
+    wrap.querySelectorAll("[data-gp-check]").forEach(el=>{
+      el.addEventListener("click", ev => ev.stopPropagation());
+      el.addEventListener("change", ()=>{
+        toggleGatePassSelection(el.dataset.gpCheck, el.checked);
       });
     });
+
+    wrap.querySelectorAll("[data-trip]").forEach(el=>
+      el.addEventListener("click", (ev)=> {
+        ev.stopPropagation();
+        openTripModal(el.dataset.trip);
+      })
+    );
+
+    wrap.querySelectorAll("[data-day]").forEach(el=>
+      el.addEventListener("click", ()=> setSelectedDay(el.dataset.day))
+    );
+
+    highlightSelectedDays();
   }
 
-  function renderCurrentTab(){
+  function renderAll(){
     renderCalendar();
+    renderInbox();
+    renderAllRequests();
     renderDispatchBoard();
+    renderSideInbox();
+    renderSelectedDayPanel();
   }
 
-  function setTypeFields(type){
-    const wrap = $("typeFields");
+  async function bootstrap(){
+    $("pinBadge").textContent = pin ? "PIN: set" : "PIN: not set";
 
-    if(type === "Delivery"){
-      wrap.innerHTML = `
-        <div class="twoCol">
-          <div>
-            <label>SO#</label>
-            <input id="pSO" placeholder="Service Order Number" />
-          </div>
-          <div>
-            <label>Client Name</label>
-            <input id="pClient" placeholder="Client name" />
-          </div>
-          <div>
-            <label>Contact Number</label>
-            <input id="pContact" placeholder="Contact number" />
-          </div>
-          <div>
-            <label>Delivery Address</label>
-            <input id="pAddress" placeholder="Delivery address" />
-          </div>
-          <div>
-            <label>Area</label>
-            <select id="pAreaClass"><option value="NON_NCR">Non-NCR</option><option value="NCR">NCR</option></select>
-          </div>
-        </div>
-        <div>
-          <label>Items to Deliver</label>
-          <textarea id="pItems" placeholder="Items to deliver"></textarea>
-        </div>
-        <div>
-          <label>Special Instructions</label>
-          <textarea id="pNotes" placeholder="Special instructions (optional)"></textarea>
-        </div>
-      `;
+    if(!pin){
+      $("rangeBadge").textContent = "PIN required";
+      openPinModal();
       return;
     }
 
-    if(type === "Client Call" || type === "Client Call"){
+    try{
+      BOOT = await api("managerBootstrap", { pin });
+      buildFilters();
+      await loadWindow();
+      startAutoRefresh();
+      $("refreshBadge").textContent = "Synced just now";
+    } catch(e){
+      $("rangeBadge").textContent = "Bootstrap failed";
+      throw e;
+    }
+  }
+
+  function buildFilters(){
+    $("statusFilter").innerHTML =
+      `<option value="ALL">All Status</option>` +
+      BOOT.statuses.map(s=>`<option>${s}</option>`).join("");
+
+    $("typeFilter").innerHTML =
+      `<option value="ALL">All Types</option>` +
+      BOOT.types.map(t=>`<option>${t}</option>`).join("");
+
+    $("driverFilter").innerHTML =
+      `<option value="ALL">All Drivers</option>` +
+      BOOT.drivers.map(d=>`<option value="${escapeAttr(d.DriverCode)}">${escapeHtml(d.DriverCode)} — ${escapeHtml(d.DriverName)}</option>`).join("");
+
+    $("vehicleFilter").innerHTML =
+      `<option value="ALL">All Vehicles</option>` +
+      BOOT.vehicles.map(v=>`<option value="${escapeAttr(v.VehicleCode)}">${escapeHtml(v.VehicleCode)} — ${escapeHtml(v.VehicleLabel)}</option>`).join("");
+
+    buildDriverSelect();
+    buildInstallerSelect();
+  }
+
+  function buildDriverSelect(){
+    $("fDriver").innerHTML =
+      `<option value="">(Unassigned)</option>` +
+      BOOT.drivers
+        .filter(d=>String(d.Active||"Y").toUpperCase()==="Y")
+        .map(d=>`<option value="${escapeAttr(d.DriverCode)}">${escapeHtml(d.DriverCode)} — ${escapeHtml(d.DriverName)}</option>`)
+        .join("");
+  }
+
+  function activeInstallers(){
+    return (BOOT && Array.isArray(BOOT.installers) ? BOOT.installers : [])
+      .map(x => ({
+        InstallerCode: String((x && x.InstallerCode) || "").trim(),
+        InstallerName: String((x && x.InstallerName) || (x && x.InstallerCode) || "").trim(),
+        ContactNumber: String((x && x.ContactNumber) || "").trim(),
+        Active: String((x && x.Active) || "Y").trim() || "Y"
+      }))
+      .filter(x => x.InstallerCode && String(x.Active || 'Y').toUpperCase() === 'Y');
+  }
+
+  function installerByCode(code){
+    return activeInstallers().find(x=>String(x.InstallerCode)===String(code)) || null;
+  }
+
+  function renderInstallerBox(){
+    const box = $("installerBox");
+    if(!box) return;
+
+    if(!selectedInstallerState.length){
+      box.innerHTML = `<span class="hint">No installers selected.</span>`;
+      return;
+    }
+
+    box.innerHTML = selectedInstallerState.map(x=>{
+      const label = `${x.InstallerCode} — ${x.InstallerName || x.InstallerCode}${x.ContactNumber ? " • " + x.ContactNumber : ""}`;
+      return `<span class="pill" style="display:inline-flex;align-items:center;gap:8px;padding-right:8px">🧰 ${escapeHtml(label)} <button type="button" data-remove-installer="${escapeAttr(x.InstallerCode)}" style="border:none;background:transparent;color:inherit;font:inherit;cursor:pointer;padding:0 2px">×</button></span>`;
+    }).join("");
+
+    box.querySelectorAll("[data-remove-installer]").forEach(btn=>{
+      btn.addEventListener("click", ()=> removeInstallerCode(btn.dataset.removeInstaller));
+    });
+  }
+
+  function buildInstallerSelect(){
+    const installers = activeInstallers();
+    const picker = $("fInstallerPicker");
+    if(!picker) return;
+
+    picker.innerHTML = installers.length
+      ? `<option value="">Select installer</option>` + installers.map(x=>`<option value="${escapeAttr(x.InstallerCode)}">${escapeHtml(x.InstallerCode)} — ${escapeHtml(x.InstallerName)}${x.ContactNumber ? " • " + escapeHtml(x.ContactNumber) : ""}</option>`).join("")
+      : `<option value="">No installers configured</option>`;
+
+    renderInstallerBox();
+  }
+
+  function addInstallerCode(code){
+    const k = String(code||"").trim();
+    if(!k) return;
+    if(selectedInstallerState.some(x=>String(x.InstallerCode)===k)){
+      $("fInstallerPicker").value = "";
+      return;
+    }
+
+    const hit = installerByCode(k) || { InstallerCode:k, InstallerName:k, ContactNumber:"" };
+    selectedInstallerState.push({
+      InstallerCode: String(hit.InstallerCode || k),
+      InstallerName: String(hit.InstallerName || k),
+      ContactNumber: String(hit.ContactNumber || "")
+    });
+
+    $("fInstallerPicker").value = "";
+    renderInstallerBox();
+  }
+
+  function removeInstallerCode(code){
+    const k = String(code||"");
+    selectedInstallerState = selectedInstallerState.filter(x=>String(x.InstallerCode)!==k);
+    renderInstallerBox();
+  }
+
+  function selectedInstallerCodes(){
+    return selectedInstallerState.map(x=>String(x.InstallerCode)).filter(Boolean);
+  }
+
+  function selectInstallerCodes(codes){
+    const wanted = Array.from(new Set((codes||[]).map(x=>String(x)).filter(Boolean)));
+    selectedInstallerState = wanted.map(code=>{
+      const hit = installerByCode(code) || (BOOT && BOOT.installers ? BOOT.installers.find(x=>String(x.InstallerCode)===String(code)) : null) || {};
+      return {
+        InstallerCode: String(hit.InstallerCode || code),
+        InstallerName: String(hit.InstallerName || code),
+        ContactNumber: String(hit.ContactNumber || "")
+      };
+    });
+    if($("fInstallerPicker")) $("fInstallerPicker").value = "";
+    renderInstallerBox();
+  }
+
+  function selectedInstallerObjects(){
+    return selectedInstallerState.map(x=>({
+      InstallerCode: x.InstallerCode,
+      InstallerName: x.InstallerName || x.InstallerCode,
+      ContactNumber: x.ContactNumber || ""
+    }));
+  }
+
+  function hydrateInstallerPickerFromPayload(payload){
+    buildInstallerSelect();
+    const picker = $("fInstallerPicker");
+    if(picker){
+      picker.onchange = ()=>{
+        const code = picker.value;
+        if(code) addInstallerCode(code);
+      };
+    }
+
+    const arr = Array.isArray(payload && payload.Installers) ? payload.Installers : [];
+    const codes = arr.map(x=> x && (x.InstallerCode || x.code || x)).filter(Boolean);
+    selectInstallerCodes(codes);
+  }
+
+  function installerLabelFromPayload(payload){
+    const arr = Array.isArray(payload && payload.Installers) ? payload.Installers : [];
+    if(!arr.length) return "";
+    return arr.map(x=>x && (x.InstallerName || x.InstallerCode || "")).filter(Boolean).join(", ");
+  }
+
+  function rebuildVehicleOptionsForSelectedDate(){
+    if(!BOOT) return;
+
+    const startVal = $("fStart").value;
+    const dateKey = startVal ? startVal.slice(0,10) : "";
+    const vehicles = BOOT.vehicles.filter(v=>String(v.Active||"Y").toUpperCase()==="Y");
+
+    const blocked = [];
+    vehicles.forEach(v=>{
+      const dates = String(v.UnavailableDates||"").split(",").map(x=>x.trim()).filter(Boolean);
+      if(dateKey && dates.includes(dateKey)) blocked.push(v.VehicleCode);
+    });
+
+    $("vehHint").textContent = blocked.length ? `Blocked on ${dateKey}: ${blocked.join(", ")}` : "";
+
+    $("fVehicle").innerHTML =
+      `<option value="">(Unassigned)</option>` +
+      vehicles.map(v=>{
+        const disabled = blocked.includes(v.VehicleCode);
+        return `<option value="${escapeAttr(v.VehicleCode)}" ${disabled?"disabled":""}>${escapeHtml(v.VehicleCode)} — ${escapeHtml(v.VehicleLabel)}${disabled?" (Unavailable)":""}</option>`;
+      }).join("");
+  }
+
+  async function loadWindow(){
+    const w = windowStartEndISO();
+    $("rangeBadge").textContent = `${nice(w.start)} → ${nice(w.end)}`;
+    const data = await api("managerListRequests", { pin, startISO: w.startISO });
+    requests = data.items || [];
+    renderAll();
+  }
+
+  document.querySelectorAll(".tab").forEach(t=>{
+    t.addEventListener("click", ()=>{
+      document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+      t.classList.add("active");
+
+      const tab = t.dataset.tab;
+      $("viewCalendar").style.display = tab==="calendar" ? "" : "none";
+      $("viewInbox").style.display = tab==="inbox" ? "" : "none";
+      $("viewAll").style.display = tab==="all" ? "" : "none";
+      $("viewDispatch").style.display = tab==="dispatch" ? "" : "none";
+    });
+  });
+
+  $("btnMobileControls").addEventListener("click", ()=>{
+    $("headerControls").classList.toggle("open");
+  });
+
+  $("btnPrev").addEventListener("click", async ()=>{
+    offsetWeeks -= 2;
+    await loadWindow();
+  });
+
+  $("btnNext").addEventListener("click", async ()=>{
+    offsetWeeks += 2;
+    await loadWindow();
+  });
+
+  $("btnToday").addEventListener("click", async ()=>{
+    offsetWeeks = 0;
+    await loadWindow();
+  });
+
+  ["statusFilter","typeFilter","schedFilter","driverFilter","vehicleFilter"].forEach(id=>{
+    $(id).addEventListener("change", renderAll);
+  });
+
+  $("q").addEventListener("input", ()=> renderAll());
+
+
+  function openPinModal(){
+    $("pinBg").style.display = "flex";
+    $("pinInput").value = pin || "";
+  }
+
+  function closePinModal(){
+    $("pinBg").style.display = "none";
+  }
+
+  $("btnPin").addEventListener("click", openPinModal);
+  $("pinClose").addEventListener("click", closePinModal);
+  $("pinBg").addEventListener("click", e=>{ if(e.target===$("pinBg")) closePinModal(); });
+
+  $("pinSave").addEventListener("click", async ()=>{
+    pin = $("pinInput").value.trim();
+    localStorage.setItem(PIN_KEY, pin);
+    $("pinBadge").textContent = pin ? "PIN: set" : "PIN: not set";
+    closePinModal();
+    await bootstrap();
+  });
+
+  function buildTypeFields(type, payload){
+    const wrap = $("typeFields");
+    const p = payload || {};
+
+    if(type==="Delivery"){
       wrap.innerHTML = `
         <div class="twoCol">
-          <div>
-            <label>Client Name</label>
-            <input id="pClient" placeholder="Client name" />
-          </div>
-          <div>
-            <label>Destination</label>
-            <input id="pDestination" placeholder="Destination" />
-          </div>
-          <div>
-            <label>Area</label>
-            <select id="pAreaClass"><option value="NON_NCR">Non-NCR</option><option value="NCR">NCR</option></select>
-          </div>
+          <div><label>SO Number</label><input id="pSO" value="${escapeAttr(p.SONumber||"")}" /></div>
+          <div><label>Client Name</label><input id="pClient" value="${escapeAttr(p.ClientName||"")}" /></div>
+          <div><label>Contact Number</label><input id="pContact" value="${escapeAttr(p.ContactNumber||"")}" /></div>
+          <div><label>Items</label><input id="pItems" value="${escapeAttr(p.Items||"")}" /></div>
+        </div>
+        <div><label>Address</label><input id="pAddr" value="${escapeAttr(p.Address||"")}" /></div>
+          <div><label>Area</label><select id="pAreaClass"><option value="NON_NCR" ${(p.AreaClass||"NON_NCR")==="NON_NCR"?"selected":""}>Non-NCR</option><option value="NCR" ${(p.AreaClass||"")==="NCR"?"selected":""}>NCR</option></select></div>
+        <div>
+          <label>Installers (Admin only)</label>
+          <select id="fInstallerPicker" style="width:100%"></select>
+          <div id="installerBox" class="line" style="margin-top:8px;gap:8px;flex-wrap:wrap;min-height:42px;padding:10px;border:1px solid rgba(255,255,255,.12);border-radius:12px;background:rgba(255,255,255,.04)"></div>
+          <div class="hint" style="margin-top:6px">Choose an installer from the dropdown. Click × to remove.</div>
+        </div>
+        <div><label>Notes</label><textarea id="pNotes">${escapeHtml(p.Notes||"")}</textarea></div>
+      `;
+      hydrateInstallerPickerFromPayload(p);
+      attachDynamicFieldListeners();
+      return;
+    }
+
+    if(type==="Client Call" || type==="Client Call"){
+      wrap.innerHTML = `
+        <div class="twoCol">
+          <div><label>Client Name</label><input id="pClient" value="${escapeAttr(p.ClientName||"")}" /></div>
+          <div><label>Destination</label><input id="pDestination" value="${escapeAttr(p.Destination||"")}" /></div>
+          <div><label>Area</label><select id="pAreaClass"><option value="NON_NCR" ${(p.AreaClass||"NON_NCR")==="NON_NCR"?"selected":""}>Non-NCR</option><option value="NCR" ${(p.AreaClass||"")==="NCR"?"selected":""}>NCR</option></select></div>
         </div>
         <div>
-          <label>Special Instructions</label>
-          <textarea id="pNotes" placeholder="Special instructions (optional)"></textarea>
+          <label>Installers (Admin only)</label>
+          <select id="fInstallerPicker" style="width:100%"></select>
+          <div id="installerBox" class="line" style="margin-top:8px;gap:8px;flex-wrap:wrap;min-height:42px;padding:10px;border:1px solid rgba(255,255,255,.12);border-radius:12px;background:rgba(255,255,255,.04)"></div>
+          <div class="hint" style="margin-top:6px">Choose an installer from the dropdown. Click × to remove.</div>
         </div>
+        <div><label>Notes</label><textarea id="pNotes">${escapeHtml(p.Notes||"")}</textarea></div>
       `;
+      hydrateInstallerPickerFromPayload(p);
+      attachDynamicFieldListeners();
       return;
     }
 
     wrap.innerHTML = `
       <div class="twoCol">
-        <div>
-          <label>Client Name (optional)</label>
-          <input id="pClient" placeholder="Client name (optional)" />
-        </div>
-        <div>
-          <label>Destination</label>
-          <input id="pDestination" placeholder="Destination" />
-        </div>
+        <div><label>Client Name (optional)</label><input id="pClient" value="${escapeAttr(p.ClientName||"")}" /></div>
+        <div><label>Destination</label><input id="pDestination" value="${escapeAttr(p.Destination||"")}" /></div>
+        <div><label>Area</label><select id="pAreaClass"><option value="NON_NCR" ${(p.AreaClass||"NON_NCR")==="NON_NCR"?"selected":""}>Non-NCR</option><option value="NCR" ${(p.AreaClass||"")==="NCR"?"selected":""}>NCR</option></select></div>
         <div>
           <label>Purpose</label>
           <select id="pPurpose">
-            <option>Purchasing</option>
-            <option>Item Pick-up</option>
-            <option>Installation / Servicing</option>
+            <option ${p.Purpose==="Purchasing"?"selected":""}>Purchasing</option>
+            <option ${p.Purpose==="Item Pick-up"?"selected":""}>Item Pick-up</option>
+            <option ${p.Purpose==="Installation / Servicing"?"selected":""}>Installation / Servicing</option>
           </select>
         </div>
         <div>
           <label>Required Vehicle</label>
-          <select id="pVehicleReq">
-            <option>Car</option>
-            <option>Pick-Up</option>
-            <option>Van</option>
-            <option>Truck</option>
-            <option>Others</option>
+          <select id="pRequiredVehicle">
+            <option ${p.RequiredVehicle==="Car"?"selected":""}>Car</option>
+            <option ${p.RequiredVehicle==="Pick-Up"?"selected":""}>Pick-Up</option>
+            <option ${p.RequiredVehicle==="Van"?"selected":""}>Van</option>
+            <option ${p.RequiredVehicle==="Truck"?"selected":""}>Truck</option>
+            <option ${p.RequiredVehicle==="Others"?"selected":""}>Others</option>
           </select>
         </div>
       </div>
       <div>
-        <label>Special Instructions</label>
-        <textarea id="pNotes" placeholder="Special instructions (optional)"></textarea>
+        <label>Installers (Admin only)</label>
+        <select id="fInstallerPicker" style="width:100%"></select>
+        <div id="installerBox" class="line" style="margin-top:8px;gap:8px;flex-wrap:wrap;min-height:42px;padding:10px;border:1px solid rgba(255,255,255,.12);border-radius:12px;background:rgba(255,255,255,.04)"></div>
+        <div class="hint" style="margin-top:6px">Choose an installer from the dropdown. Click × to remove.</div>
       </div>
+      <div><label>Notes</label><textarea id="pNotes">${escapeHtml(p.Notes||"")}</textarea></div>
     `;
+    hydrateInstallerPickerFromPayload(p);
+    attachDynamicFieldListeners();
   }
 
-  function getValue(id){
-    const el = $(id);
-    return el ? el.value.trim() : "";
+  function gatherPayload(type){
+    if(type==="Delivery"){
+      return {
+        SONumber: $("pSO") ? $("pSO").value.trim() : "",
+        ClientName: $("pClient") ? $("pClient").value.trim() : "",
+        ContactNumber: $("pContact") ? $("pContact").value.trim() : "",
+        Address: $("pAddr") ? $("pAddr").value.trim() : "",
+        Items: $("pItems") ? $("pItems").value.trim() : "",
+        Notes: $("pNotes") ? $("pNotes").value.trim() : "",
+        AreaClass: $("pAreaClass") ? $("pAreaClass").value.trim() : "NON_NCR",
+        InstallerCodes: selectedInstallerCodes(),
+        Installers: selectedInstallerObjects()
+      };
+    }
+
+    if(type==="Client Call" || type==="Client Call"){
+      return {
+        ClientName: $("pClient") ? $("pClient").value.trim() : "",
+        Destination: $("pDestination") ? $("pDestination").value.trim() : "",
+        Notes: $("pNotes") ? $("pNotes").value.trim() : "",
+        AreaClass: $("pAreaClass") ? $("pAreaClass").value.trim() : "NON_NCR",
+        InstallerCodes: selectedInstallerCodes(),
+        Installers: selectedInstallerObjects()
+      };
+    }
+
+    return {
+      ClientName: $("pClient") ? $("pClient").value.trim() : "",
+      Destination: $("pDestination") ? $("pDestination").value.trim() : "",
+      Purpose: $("pPurpose") ? $("pPurpose").value.trim() : "",
+      RequiredVehicle: $("pRequiredVehicle") ? $("pRequiredVehicle").value.trim() : "",
+      Notes: $("pNotes") ? $("pNotes").value.trim() : "",
+      AreaClass: $("pAreaClass") ? $("pAreaClass").value.trim() : "NON_NCR",
+      InstallerCodes: selectedInstallerCodes(),
+      Installers: selectedInstallerObjects()
+    };
   }
 
-  function validateForm(type){
-    const errs = [];
+  function setRequestBusy(busy, mode){
+    const ids = ["btnClose","btnCancelReq","btnSave","btnConfirm","btnDuplicate"];
+    ids.forEach(id=>{
+      const el = $(id);
+      if(el) el.disabled = busy;
+    });
 
-    if(!getValue("fRequestedBy")) errs.push("Requestor Name is required.");
-    if(!$("fDate").value) errs.push("Date is required.");
-    if(!$("fTime").value) errs.push("Time is required.");
-
-    if(type === "Delivery"){
-      if(!getValue("pSO")) errs.push("SO# is required.");
-      if(!getValue("pClient")) errs.push("Client Name is required.");
-      if(!getValue("pContact")) errs.push("Contact Number is required.");
-      if(!getValue("pAddress")) errs.push("Delivery Address is required.");
-      if(!getValue("pItems")) errs.push("Items to Deliver is required.");
-    }
-
-    if(type === "Client Call" || type === "Client Call"){
-      if(!getValue("pClient")) errs.push("Client Name is required.");
-      if(!getValue("pDestination")) errs.push("Destination is required.");
-    }
-
-    if(type === "Service"){
-      if(!getValue("pDestination")) errs.push("Destination is required.");
-      if(!getValue("pPurpose")) errs.push("Purpose is required.");
-      if(!getValue("pVehicleReq")) errs.push("Required Vehicle is required.");
-    }
-
-    return errs;
+    $("btnSave").textContent = busy && mode==="save" ? "Saving..." : "Save";
+    $("btnConfirm").textContent = busy && mode==="confirm" ? "Saving..." : "Save + CONFIRM";
+    $("btnCancelReq").textContent = busy && mode==="cancel" ? "Saving..." : "Set CANCELLED";
+    $("btnDuplicate").textContent = busy && mode==="duplicate" ? "Duplicating..." : "Duplicate";
   }
 
-  async function submitRequest(){
-    if(isSubmittingRequest) return;
+  function validateRequestForm(){
+    const RequestedBy = $("fRequestedBy").value.trim();
+    const startRaw = $("fStart").value;
+    const endRaw = $("fEnd").value;
 
-    const type = $("fType").value;
-    const errs = validateForm(type);
-    if(errs.length) return alert(errs.join("\n"));
-
-    const date = $("fDate").value;
-    const time = $("fTime").value;
-    const start = new Date(`${date}T${time}:00`);
-    const end = new Date(start.getTime() + 4 * 60 * 60 * 1000);
-
-    let payload = {};
-
-    if(type === "Delivery"){
-      payload = {
-        SONumber: getValue("pSO"),
-        ClientName: getValue("pClient"),
-        ContactNumber: getValue("pContact"),
-        Address: getValue("pAddress"),
-        Items: getValue("pItems"),
-        Notes: getValue("pNotes"),
-        AreaClass: getValue("pAreaClass") || "NON_NCR"
-      };
-    } else if(type === "Client Call" || type === "Client Call"){
-      payload = {
-        ClientName: getValue("pClient"),
-        Destination: getValue("pDestination"),
-        Notes: getValue("pNotes"),
-        AreaClass: getValue("pAreaClass") || "NON_NCR"
-      };
-    } else {
-      payload = {
-        ClientName: getValue("pClient"),
-        Destination: getValue("pDestination"),
-        Purpose: getValue("pPurpose"),
-        RequiredVehicle: getValue("pVehicleReq"),
-        Notes: getValue("pNotes"),
-        AreaClass: getValue("pAreaClass") || "NON_NCR"
-      };
+    if(!RequestedBy){
+      alert("Requestor is required.");
+      return false;
     }
+
+    if(!startRaw){
+      alert("Start date/time is required.");
+      return false;
+    }
+
+    const start = new Date(startRaw);
+    if(Number.isNaN(start.getTime())){
+      alert("Invalid start date/time.");
+      return false;
+    }
+
+    if(endRaw){
+      const end = new Date(endRaw);
+      if(Number.isNaN(end.getTime())){
+        alert("Invalid end date/time.");
+        return false;
+      }
+
+      if(end <= start){
+        alert("End date/time must be later than start date/time.");
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  function openNewRequestModal(){
+    isCreating = true;
+    currentRequest = null;
+
+    $("modalBg").style.display = "flex";
+    $("modalTitle").textContent = "Create New Request";
+    $("modalRid").textContent = "NEW";
+    $("modalTypeBadge").textContent = "";
+    $("modalSchedBadge").textContent = "UNSCHEDULED";
+
+    const now = new Date();
+    const later = new Date(now.getTime() + 4 * 60 * 60 * 1000);
+
+    $("fType").value = "Delivery";
+    $("fStatus").value = "PENDING";
+    $("fRequestedBy").value = "";
+    $("fStart").value = toLocalInputValue(now.toISOString());
+    $("fEnd").value = toLocalInputValue(later.toISOString());
+    $("fDriver").value = "";
+
+    rebuildVehicleOptionsForSelectedDate();
+    $("fVehicle").value = "";
+    selectInstallerCodes([]);
+
+    buildTypeFields("Delivery", {});
+    renderRequestSummary();
+    renderScheduleInsights();
+    setRequestBusy(false);
+  }
+
+  function openModal(requestId){
+    isCreating = false;
+    currentRequest = requests.find(r=>r.RequestID===requestId) || null;
+    if(!currentRequest) return;
+
+    $("modalBg").style.display = "flex";
+    $("modalTitle").textContent = "Request Details";
+    $("modalRid").textContent = currentRequest.RequestID;
+    $("modalTypeBadge").textContent = currentRequest.Type;
+    $("modalSchedBadge").textContent = isScheduled(currentRequest) ? "SCHEDULED" : "UNSCHEDULED";
+
+    $("fType").value = currentRequest.Type;
+    $("fStatus").value = currentRequest.Status;
+    $("fRequestedBy").value = currentRequest.RequestedBy || "";
+    $("fStart").value = toLocalInputValue(currentRequest.StartDT);
+    $("fEnd").value = toLocalInputValue(currentRequest.EndDT);
+    $("fDriver").value = currentRequest.DriverCode || "";
+
+    rebuildVehicleOptionsForSelectedDate();
+    $("fVehicle").value = currentRequest.VehicleCode || "";
+    selectInstallerCodes(currentRequest.InstallerCodes || ((currentRequest.Payload && currentRequest.Payload.InstallerCodes) || []).map(String));
+
+    buildTypeFields(currentRequest.Type, currentRequest.Payload || {});
+    renderRequestSummary();
+    renderScheduleInsights();
+    setRequestBusy(false);
+  }
+
+  function closeModal(){
+    if(isSavingRequest) return;
+    $("modalBg").style.display = "none";
+    currentRequest = null;
+    isCreating = false;
+  }
+
+  $("btnNew").addEventListener("click", openNewRequestModal);
+  $("btnClose").addEventListener("click", closeModal);
+  $("modalBg").addEventListener("click", e=>{ if(e.target===$("modalBg")) closeModal(); });
+
+  $("fStart").addEventListener("change", ()=>{
+    rebuildVehicleOptionsForSelectedDate();
+
+    if(!$("fEnd").value && $("fStart").value){
+      const start = new Date($("fStart").value);
+      const end = addHoursLocal(start, 4);
+      $("fEnd").value = toLocalInputValue(end.toISOString());
+    }
+    renderScheduleInsights();
+    renderRequestSummary();
+  });
+  $("fEnd").addEventListener("change", ()=>{ renderScheduleInsights(); renderRequestSummary(); });
+  $("fDriver").addEventListener("change", ()=>{ renderScheduleInsights(); renderRequestSummary(); });
+  $("fVehicle").addEventListener("change", ()=>{ renderScheduleInsights(); renderRequestSummary(); });
+  $("fRequestedBy").addEventListener("input", ()=> renderRequestSummary());
+  $("fType").addEventListener("change", ()=> buildTypeFields($("fType").value, {}));
+
+  async function createRequest(){
+    const Type = $("fType").value;
+    const RequestedBy = $("fRequestedBy").value.trim();
+    const { StartDT, EndDT, endLocalInput } = getStartEndISOFromForm();
+    if(!$("fEnd").value) $("fEnd").value = endLocalInput;
+    const DriverCode = $("fDriver").value;
+    const VehicleCode = $("fVehicle").value;
+    const Payload = gatherPayload(Type);
 
     const clientRequestId = (window.crypto && crypto.randomUUID)
       ? crypto.randomUUID()
-      : `STAFF-${Date.now()}-${Math.random().toString(36).slice(2,10)}`;
+      : `ADMIN-${Date.now()}-${Math.random().toString(36).slice(2,10)}`;
+
+    const created = await api("createRequest", {
+      clientRequestId,
+      Type,
+      RequestedBy,
+      ViberUserID: "ADMIN-CREATED",
+      StartDT,
+      EndDT,
+      Payload
+    });
+
+    const status = $("fStatus").value;
+    if(DriverCode || VehicleCode || status !== "PENDING"){
+      await api("managerUpdate", {
+        pin,
+        requestId: created.requestId,
+        updates: {
+          Type,
+          RequestedBy,
+          StartDT,
+          EndDT,
+          DriverCode,
+          VehicleCode,
+          Status: status,
+          Payload
+        }
+      });
+    }
+
+    alert(`Request created successfully.\n\nRequest ID: ${created.requestId}`);
+
+    isSavingRequest = false;
+    setRequestBusy(false);
+    closeModal();
+    await bootstrap();
+  }
+
+  async function saveRequest(nextStatus, mode){
+    if(isSavingRequest) return;
+    if(!validateRequestForm()) return;
 
     try{
-      isSubmittingRequest = true;
-      setSubmitBusy(true);
+      isSavingRequest = true;
+      setRequestBusy(true, mode);
 
-      const res = await api("createRequest", {
-        clientRequestId,
-        Type: type,
-        RequestedBy: getValue("fRequestedBy"),
-        ViberUserID: "WEB-PORTAL",
-        StartDT: start.toISOString(),
-        EndDT: end.toISOString(),
-        Payload: payload
+      if(isCreating){
+        await createRequest();
+        return;
+      }
+
+      if(!currentRequest) return;
+
+      const Type = $("fType").value;
+      const RequestedBy = $("fRequestedBy").value.trim();
+      const { StartDT, EndDT, endLocalInput } = getStartEndISOFromForm();
+      if(!$("fEnd").value) $("fEnd").value = endLocalInput;
+      const DriverCode = $("fDriver").value;
+      const VehicleCode = $("fVehicle").value;
+      const Status = nextStatus || $("fStatus").value;
+      const Payload = gatherPayload(Type);
+
+      await api("managerUpdate", {
+        pin,
+        requestId: currentRequest.RequestID,
+        updates: {
+          Type,
+          RequestedBy,
+          StartDT,
+          EndDT,
+          DriverCode,
+          VehicleCode,
+          Status,
+          Payload
+        }
       });
 
-      alert(`Request submitted successfully.\n\nRequest ID: ${res.requestId}\nCancel Code: ${res.cancelCode}`);
+      let successMessage = "Request saved successfully.";
+      if(Status === "CONFIRMED") successMessage = "Request confirmed successfully.";
+      if(Status === "CANCELLED") successMessage = "Request marked as CANCELLED.";
 
-      isSubmittingRequest = false;
-      setSubmitBusy(false);
-      closeRequestModal();
-      await load();
+      alert(`${successMessage}\n\nRequest ID: ${currentRequest.RequestID}`);
+
+      isSavingRequest = false;
+      setRequestBusy(false);
+      closeModal();
+      await bootstrap();
 
     } catch(err){
-      isSubmittingRequest = false;
-      setSubmitBusy(false);
-      alert("Failed to submit request.\n\n" + (err.message || err));
+      isSavingRequest = false;
+      setRequestBusy(false);
+      alert("Failed to save request.\n\n" + (err.message || err));
     }
   }
 
-  async function load(){
-    BOOT = await api("bootstrapPublic", {});
-    const dates = windowDates();
-    const startISO = dates[0].toISOString();
-    const data = await api("publicSchedule", { startISO });
-    items = data.items || [];
-    renderCurrentTab();
-    startAutoRefresh();
-    $("refreshBadge").textContent = "Synced just now";
+  $("btnSave").addEventListener("click", ()=> saveRequest(null, "save"));
+  $("btnConfirm").addEventListener("click", ()=> saveRequest("CONFIRMED", "confirm"));
+  $("btnCancelReq").addEventListener("click", ()=> saveRequest("CANCELLED", "cancel"));
+
+  $("btnDuplicate").addEventListener("click", async ()=>{
+    if(isSavingRequest) return;
+    if(!validateRequestForm()) return;
+
+    if(isCreating){
+      alert("Create the request first before duplicating.");
+      return;
+    }
+
+    if(!currentRequest) return;
+
+    try{
+      isSavingRequest = true;
+      setRequestBusy(true, "duplicate");
+
+      const Type = $("fType").value;
+      const RequestedBy = $("fRequestedBy").value.trim();
+      const { StartDT, EndDT, endLocalInput } = getStartEndISOFromForm();
+      if(!$("fEnd").value) $("fEnd").value = endLocalInput;
+      const DriverCode = $("fDriver").value;
+      const VehicleCode = $("fVehicle").value;
+      const Payload = gatherPayload(Type);
+      const Status = confirm("Duplicate as CONFIRMED?\nOK = CONFIRMED, Cancel = PENDING") ? "CONFIRMED" : "PENDING";
+
+      await api("managerUpdate", {
+        pin,
+        requestId: currentRequest.RequestID,
+        updates: {
+          Type,
+          RequestedBy,
+          StartDT,
+          EndDT,
+          DriverCode,
+          VehicleCode,
+          Status: $("fStatus").value,
+          Payload
+        }
+      });
+
+      await api("managerDuplicate", {
+        pin,
+        sourceRequestId: currentRequest.RequestID,
+        overrides: { StartDT, EndDT, DriverCode, VehicleCode, Status }
+      });
+
+      alert(`Request duplicated successfully.\n\nSource Request ID: ${currentRequest.RequestID}`);
+
+      isSavingRequest = false;
+      setRequestBusy(false);
+      closeModal();
+      await bootstrap();
+
+    } catch(err){
+      isSavingRequest = false;
+      setRequestBusy(false);
+      alert("Failed to duplicate request.\n\n" + (err.message || err));
+    }
+  });
+
+
+  function selectedMode(name){
+    const hit = document.querySelector(`input[name="${name}"]:checked`);
+    return hit ? hit.value : "AUTO";
   }
 
-  $("btnPrev").addEventListener("click", async ()=>{ offsetWeeks -= 2; await load(); });
-  $("btnNext").addEventListener("click", async ()=>{ offsetWeeks += 2; await load(); });
-  $("btnCurrent").addEventListener("click", async ()=>{ offsetWeeks = 0; await load(); });
+  function syncTripModeInputs(){
+    $("tripStartTime").disabled = selectedMode("startMode") !== "MANUAL";
+    $("tripEndTime").disabled = selectedMode("endMode") !== "MANUAL";
+  }
 
-  $("btnNewRequest").addEventListener("click", openRequestModal);
-  $("btnRequestClose").addEventListener("click", closeRequestModal);
-  $("requestBg").addEventListener("click", e=>{ if(e.target === $("requestBg")) closeRequestModal(); });
+  function openTripModal(requestId){
+    const r = requests.find(x => x.RequestID === requestId);
+    if(!r) return;
+    currentRequest = r;
+    $("tripBg").style.display = "flex";
+    $("tripRid").textContent = r.RequestID;
+    $("tripCurrentStatus").textContent = tripStatusLabel(r);
+    $("tripSummary").innerHTML = buildSummaryGridHTML(r, r.Payload || {}) + `<div class="small" style="margin-top:8px"><b>Trip Log:</b> ${escapeHtml(tripTimesHTML(r))}</div>`;
+    $("tripStartTime").value = r.DepartedAt ? toLocalInputValue(r.DepartedAt) : "";
+    $("tripEndTime").value = r.ArrivedAt ? toLocalInputValue(r.ArrivedAt) : "";
+    document.querySelector('input[name="startMode"][value="AUTO"]').checked = !r.DepartedAt;
+    document.querySelector('input[name="startMode"][value="MANUAL"]').checked = !!r.DepartedAt;
+    document.querySelector('input[name="endMode"][value="AUTO"]').checked = !r.ArrivedAt;
+    document.querySelector('input[name="endMode"][value="MANUAL"]').checked = !!r.ArrivedAt;
+    syncTripModeInputs();
+  }
 
-  $("btnDetailClose").addEventListener("click", closeDetailModal);
-  $("detailBg").addEventListener("click", e=>{ if(e.target === $("detailBg")) closeDetailModal(); });
+  function closeTripModal(){ $("tripBg").style.display = "none"; }
 
-  $("fType").addEventListener("change", ()=> setTypeFields($("fType").value));
-  $("btnSubmitRequest").addEventListener("click", submitRequest);
+  async function saveTripUpdate(tripAction){
+    if(!currentRequest) return;
+    const payload = {
+      pin,
+      requestId: currentRequest.RequestID,
+      tripAction,
+      startMode: selectedMode("startMode"),
+      endMode: selectedMode("endMode"),
+      startTime: $("tripStartTime").value ? fromLocalInputValue($("tripStartTime").value) : "",
+      endTime: $("tripEndTime").value ? fromLocalInputValue($("tripEndTime").value) : ""
+    };
+    await api("managerUpdateTrip", payload);
+    closeTripModal();
+    await bootstrap();
+  }
 
-  $("btnTodayDate").addEventListener("click", ()=>{
-    const d = new Date();
-    $("fDate").value = `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
+  document.querySelectorAll('input[name="startMode"], input[name="endMode"]').forEach(el => el.addEventListener('change', syncTripModeInputs));
+  $("tripClose").addEventListener("click", closeTripModal);
+  $("tripBg").addEventListener("click", e=>{ if(e.target === $("tripBg")) closeTripModal(); });
+  $("tripStartBtn").addEventListener("click", ()=> saveTripUpdate("START"));
+  $("tripEndBtn").addEventListener("click", ()=> saveTripUpdate("END"));
+  $("tripCorrect").addEventListener("click", ()=> saveTripUpdate("CORRECT"));
+  $("toggleSideInbox").addEventListener("click", ()=> toggleSection("sideInboxSection","sideInboxChevron"));
+  $("toggleSideDay").addEventListener("click", ()=> toggleSection("sideDaySection","sideDayChevron"));
+
+  bootstrap().catch(e=>{
+    console.error("Bootstrap failed:", e);
+    $("rangeBadge").textContent = "Load failed";
+    alert("Bootstrap failed:\n\n" + (e.message || e));
+    openPinModal();
   });
-
-  $("btnTomorrowDate").addEventListener("click", ()=>{
-    const d = new Date();
-    d.setDate(d.getDate()+1);
-    $("fDate").value = `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
-  });
-
-  document.querySelectorAll("[data-time]").forEach(btn=>{
-    btn.addEventListener("click", ()=>{
-      $("fTime").value = btn.dataset.time;
-    });
-  });
-
-  document.querySelectorAll("[data-tab]").forEach(tab=>{
-    tab.addEventListener("click", ()=>{
-      document.querySelectorAll("[data-tab]").forEach(x=>x.classList.remove("active"));
-      tab.classList.add("active");
-      const which = tab.dataset.tab;
-      $("cal").style.display = which === "calendar" ? "" : "none";
-      $("dispatchView").style.display = which === "dispatch" ? "" : "none";
-    });
-  });
-
-  // defaults
-  const now = new Date();
-  $("fDate").value = `${now.getFullYear()}-${pad2(now.getMonth()+1)}-${pad2(now.getDate())}`;
-  $("fTime").value = "08:00";
-  setTypeFields("Delivery");
-
-  load().catch(e=> alert(e.message || e));
 </script>
 </body>
 </html>
